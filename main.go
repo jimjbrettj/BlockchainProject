@@ -2,14 +2,17 @@ package main
 
 import (
   "fmt"
-  "os"
 )
 
 func main() {
-  if len(os.Args) < 2 {
-    fmt.Println("Error, no filename given")
-    os.Exit(1)
-  }
-  arg := os.Args[1]
-  fmt.Println("Filename is: " + arg)
+  // Println function is used to
+  // display output in the next line
+  fmt.Print("Enter the filename: ")
+
+  // var then variable name then variable type
+  var filename string
+
+  // Taking input from user
+  fmt.Scanln(&filename)
+  fmt.Println("Filename is: " + filename)
 }
