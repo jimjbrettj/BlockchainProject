@@ -1,18 +1,30 @@
 package main
 
 import (
+  "bufio"
   "fmt"
+  "log"
+  "os"
 )
 
 func main() {
-  // Println function is used to
-  // display output in the next line
   fmt.Print("Enter the filename: ")
-
-  // var then variable name then variable type
   var filename string
-
-  // Taking input from user
   fmt.Scanln(&filename)
   fmt.Println("Filename is: " + filename)
+
+  file, err := os.Open(filename)
+  if err != nil {
+    log.Fatal(err)
+  }
+  defer file.Close()
+
+  scanner := bufio.NewScanner(file)
+  for scanner.Scan() {
+    fmt.Println(scanner.Text())
+  }
+
+  if err := scanner.Err(); err != nil {
+    log.Fatal(err)
+  }
 }
