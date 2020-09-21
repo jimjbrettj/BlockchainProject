@@ -21,6 +21,9 @@ func readFile(filename string) ([]string, error) {
   var lines []string
   for scanner.Scan() {
     lines = append(lines, scanner.Text())
+    if len(scanner.Text()) > 100 {
+      log.Fatal("String input to large")
+    }
   }
 
   return lines, scanner.Err()
