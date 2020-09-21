@@ -6,6 +6,7 @@ import (
   "fmt"
   "log"
   "os"
+  "sort"
 )
 
 func readFile(filename string) ([]string, error) {
@@ -35,6 +36,7 @@ func main() {
   if err != nil {
     log.Fatal(err)
   }
+  sort.Strings(lines)
 
   leafs := make([]*MerkleTree.Node, len(lines))
   for i, line := range lines {
