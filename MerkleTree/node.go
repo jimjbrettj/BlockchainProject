@@ -1,6 +1,12 @@
 package MerkleTree
 
-import "crypto/sha256"
+import (
+	"crypto/sha256"
+	"fmt"
+)
+type MerkleRoot struct {
+	Root      TreeNode
+}
 
 type TreeNode struct {
 	Hash      string
@@ -22,4 +28,22 @@ func CreateLeafNode(key string) *LeafNode {
 	node.Key = key
 	node.Hash = string(hash[:])
 	return &node
+}
+
+func Construct(leafs []*LeafNode, size int) *MerkleRoot {
+	odd := false
+	if size % 2 != 0 {
+		odd = true
+	}
+	for i, leaf := range leafs {
+		if i == len(leafs) - 1 && odd {
+			fmt.Println("This is the last element")
+		}
+
+		fmt.Println(i, leaf.Key)
+	}
+
+
+	root := MerkleRoot{}
+	return &root
 }

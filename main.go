@@ -44,7 +44,7 @@ func main() {
   leafs := make([]*MerkleTree.LeafNode, len(lines))
   for i, line := range lines {
     leafs[i] = MerkleTree.CreateLeafNode(line)
-    fmt.Println(i, line)
   }
-
+  var root *MerkleTree.MerkleRoot = MerkleTree.Construct(leafs, len(lines))
+  fmt.Println("Root is: ", root)
 }
