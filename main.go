@@ -8,13 +8,7 @@ import (
   "os"
 )
 
-
-func main() {
-  fmt.Print("Enter the filename: ")
-  var filename string
-  fmt.Scanln(&filename)
-  fmt.Println("Filename is: " + filename)
-
+func readFile(filename string) ([]string, error) {
   // Open and read file
   file, err := os.Open(filename)
   if err != nil {
@@ -23,13 +17,29 @@ func main() {
   defer file.Close()
 
   scanner := bufio.NewScanner(file)
+  var lines []string
   for scanner.Scan() {
-    var line string = scanner.Text()
-    node := MerkleTree.CreateMerkleNode(line, nil, nil)
-    println(node.Key)
+    lines = append(lines, scanner.Text())
   }
 
-  if err := scanner.Err(); err != nil {
+  return lines, scanner.Err()
+}
+
+func main() {
+  fmt.Print("Enter the filename: ")
+  var filename string
+  fmt.Scanln(&filename)
+  fmt.Println("Filename is: " + filename)
+
+  lines, err := readFile(filename)
+  if err != nil {
     log.Fatal(err)
   }
+
+  leafs := make([]*MerkleTree.Node, len(lines))
+  for i, line := range lines {
+    leafs[i] = MerkleTree.CreateMerkleNode(line, nil, nil)
+    fmt.Println(i, line)
+  }
+
 }
