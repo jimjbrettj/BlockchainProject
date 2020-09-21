@@ -41,9 +41,9 @@ func main() {
   }
   sort.Strings(lines)
 
-  leafs := make([]*MerkleTree.Node, len(lines))
+  leafs := make([]*MerkleTree.LeafNode, len(lines))
   for i, line := range lines {
-    leafs[i] = MerkleTree.CreateMerkleNode(line, nil, nil)
+    leafs[i] = MerkleTree.CreateLeafNode(line)
     fmt.Println(i, line)
   }
 
