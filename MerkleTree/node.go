@@ -30,20 +30,27 @@ func CreateLeafNode(key string) *LeafNode {
 	return &node
 }
 
-func Construct(leafs []*LeafNode, size int) *MerkleRoot {
-	odd := false
+func hash(l string, r string) string {
+	s := l + r
+	data := []byte(s)
+	hash := sha256.Sum256(data)
+	return string(hash[:])
+}
+
+func Construct(leafs []*LeafNode, size int) *TreeNode {
+	//odd := false
+	// Adds empty block if odd
+	root := TreeNode{}
 	if size % 2 != 0 {
-		odd = true
-	}
-	for i, leaf := range leafs {
-		if i == len(leafs) - 1 && odd {
-			fmt.Println("This is the last element")
-		}
-
-		fmt.Println(i, leaf.Key)
+		//odd = true
+		node := LeafNode{}
+		node.Key = ""
+		node.Hash = ""
+		leafs = append(leafs, &node)
 	}
 
-
-	root := MerkleRoot{}
+	for i := 0; i < len(leafs); i++{
+		fmt.Println(i, leafs[i].Key)
+	}
 	return &root
 }
