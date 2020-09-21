@@ -2,24 +2,10 @@ package MerkleTree
 
 import "crypto/sha256"
 
-type MerkleTree struct {
-	Root *TreeNode
-}
-
-// Struct for tree nodes
-//type Node struct {
-//	Key       string
-//	Hash      string
-//	Left      *Node
-//	Right     *Node
-//	LeftEdge  string
-//	RightEdge string
-//}
-
 type TreeNode struct {
 	Hash      string
-	//Left      *Node
-	//Right     *Node
+	Left      interface{}
+	Right     interface{}
 	LeftEdge  string
 	RightEdge string
 }
