@@ -7,6 +7,7 @@ import (
   "log"
   "os"
   "sort"
+  "strings"
 )
 
 func readFile(filename string) ([]string, error) {
@@ -29,6 +30,18 @@ func readFile(filename string) ([]string, error) {
   return lines, scanner.Err()
 }
 
+func writeTree(root *MerkleTree.TreeNode, file *os.File) bool {
+  // Write to the file
+  _, err2 := file.WriteString("Hello GoLang")
+  // Make sure write was successful
+  if err2 != nil {
+      log.Fatal(err2)
+  }
+
+  // Return
+  return false
+}
+
 func main() {
   fmt.Print("Enter the filename: ")
   var filename string
@@ -47,4 +60,20 @@ func main() {
   }
   root := MerkleTree.Construct(leafs, len(lines))
   fmt.Println("Root is: ", root)
+
+  // split the file name to adhere to output format
+  splitFile := strings.Split(filename, ".")
+  outFile := splitFile[0] + ".out.txt"
+  // Create the file to write to
+  file, err := os.Create(outFile)
+  // Make sure creation completed
+  if err != nil {
+      log.Fatal(err)
+  }
+  // Set the file to close when finished
+  defer file.Close()
+
+  printed := writeTree(root, file)
+
+  fmt.Println("Success? ", printed)
 }
