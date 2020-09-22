@@ -30,6 +30,24 @@ func readFile(filename string) ([]string, error) {
   return lines, scanner.Err()
 }
 
+func writeArray(tree []string, file *os.File) bool {
+  // Write to the file
+  _, err := file.WriteString("Starting to print the tree\n")
+  // Make sure write was successful
+  if err != nil {
+    log.Fatal(err)
+  }
+  // Begin printing out the contents of the array
+  for i := 0; i < len(tree); i++ {
+		_, err2 := file.WriteString(tree[i] + "\n")
+    // Make sure write was successful
+    if err2 != nil {
+      log.Fatal(err2)
+    }
+  }
+  return false;
+}
+
 func writeTree(root *MerkleTree.TreeNode, file *os.File) bool {
   // Write to the file
   _, err2 := file.WriteString("Hello GoLang")
@@ -73,7 +91,8 @@ func main() {
   // Set the file to close when finished
   defer file.Close()
 
-  printed := writeTree(root, file)
+  array := []string{"first", "second", "third", "fourth", "fifth"}
+  printed := writeArray(array, file)
 
   fmt.Println("Success? ", printed)
 }
