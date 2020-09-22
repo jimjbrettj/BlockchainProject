@@ -87,12 +87,12 @@ func main() {
   // Make sure creation completed
   if err != nil {
     log.Fatal(err)
-    // Set the file to close when finished
-    defer file.Close()
-
-    array := []string{"first", "second", "third", "fourth", "fifth"}
-    printed := writeArray(array, file)
-
-    fmt.Println("Success? ", printed)
   }
+  // Set the file to close when finished
+  defer file.Close()
+
+  array := []string{"first", "second", "third", "fourth", "fifth"}
+  printed := writeArray(array, file)
+
+  fmt.Println("Success? ", printed)
 }
