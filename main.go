@@ -39,11 +39,7 @@ func writeArray(tree []string, file *os.File) bool {
   }
   // Begin printing out the contents of the array
   for i := 0; i < len(tree); i++ {
-<<<<<<< HEAD
     _, err2 := file.WriteString(tree[i] + "\n")
-=======
-		_, err2 := file.WriteString(tree[i] + "\n")
->>>>>>> origin/rkWriteFile
     // Make sure write was successful
     if err2 != nil {
       log.Fatal(err2)
@@ -57,11 +53,7 @@ func writeTree(root *MerkleTree.TreeNode, file *os.File) bool {
   _, err2 := file.WriteString("Hello GoLang")
   // Make sure write was successful
   if err2 != nil {
-<<<<<<< HEAD
     log.Fatal(err2)
-=======
-      log.Fatal(err2)
->>>>>>> origin/rkWriteFile
   }
 
   // Return
