@@ -7,6 +7,7 @@ import (
   "log"
   "os"
   "sort"
+  "strings"
 )
 
 func readFile(filename string) ([]string, error) {
@@ -29,6 +30,36 @@ func readFile(filename string) ([]string, error) {
   return lines, scanner.Err()
 }
 
+func writeArray(tree []string, file *os.File) bool {
+  // Write to the file
+  _, err := file.WriteString("Starting to print the tree\n")
+  // Make sure write was successful
+  if err != nil {
+    log.Fatal(err)
+  }
+  // Begin printing out the contents of the array
+  for i := 0; i < len(tree); i++ {
+    _, err2 := file.WriteString(tree[i] + "\n")
+    // Make sure write was successful
+    if err2 != nil {
+      log.Fatal(err2)
+    }
+  }
+  return false
+}
+
+func writeTree(root *MerkleTree.TreeNode, file *os.File) bool {
+  // Write to the file
+  _, err2 := file.WriteString("Hello GoLang")
+  // Make sure write was successful
+  if err2 != nil {
+    log.Fatal(err2)
+  }
+
+  // Return
+  return false
+}
+
 func main() {
   fmt.Print("Enter the filename: ")
   var filename string
@@ -47,4 +78,21 @@ func main() {
   }
   root := MerkleTree.Construct(leafs, len(lines))
   fmt.Println("Root is: ", root)
+
+  // split the file name to adhere to output format
+  splitFile := strings.Split(filename, ".")
+  outFile := splitFile[0] + ".out.txt"
+  // Create the file to write to
+  file, err := os.Create(outFile)
+  // Make sure creation completed
+  if err != nil {
+    log.Fatal(err)
+  }
+  // Set the file to close when finished
+  defer file.Close()
+
+  array := []string{"first", "second", "third", "fourth", "fifth"}
+  printed := writeArray(array, file)
+
+  fmt.Println("Success? ", printed)
 }
