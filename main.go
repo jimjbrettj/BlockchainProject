@@ -45,7 +45,7 @@ func writeArray(tree []string, file *os.File) bool {
       log.Fatal(err2)
     }
   }
-  return false;
+  return false
 }
 
 func writeTree(root *MerkleTree.TreeNode, file *os.File) bool {
