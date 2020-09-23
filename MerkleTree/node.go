@@ -2,7 +2,6 @@ package MerkleTree
 
 import (
 	"crypto/sha256"
-	"fmt"
 )
 type Trie struct {
 	Root      *TreeNode
@@ -31,7 +30,7 @@ func CreateLeafNode(key string) *LeafNode {
 }
 
 // Concats 2 strings and takes the hash of it
-func hash(l string, r string) string {
+func Hash(l string, r string) string {
 	s := l + r
 	data := []byte(s)
 	hash := sha256.Sum256(data)
@@ -55,6 +54,7 @@ func findPrefix(s1 string, s2 string) string {
 }
 
 func Insert(leaf *LeafNode, trie *Trie) {
+	// If tree empty, insert at root
 	if trie.Root == nil {
 		node := TreeNode{}
 		node.Hash = leaf.Hash
@@ -64,17 +64,18 @@ func Insert(leaf *LeafNode, trie *Trie) {
 		node.Right = nil
 		trie.Root = &node
 	} else {
+		// Check if right is null
 		if trie.Root.Right == nil && trie.Root.RightEdge < leaf.Key {
-			fmt.Println("Made it here")
 			trie.Root.Right = leaf
 			trie.Root.RightEdge = leaf.Key
-			switch t := trie.Root.Left.(type) {
-				default: fmt.Println("Type is: ", t)
+			switch trie.Root.Left.(type) {
 				case *LeafNode:
-					trie.Root.Hash = hash(trie.Root.Left.(*LeafNode).Hash, leaf.Hash)
+					trie.Root.Hash = Hash(trie.Root.Left.(*LeafNode).Key, leaf.Key)
 				case *TreeNode:
-					trie.Root.Hash = hash(trie.Root.Left.(*TreeNode).Hash, leaf.Hash)
+					trie.Root.Hash = Hash(trie.Root.Left.(*TreeNode).Hash, leaf.Key)
 			}
+		} else {
+			// Add logic here
 		}
 	}
 }
