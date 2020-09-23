@@ -76,7 +76,8 @@ func main() {
   for i, line := range lines {
     leafs[i] = MerkleTree.CreateLeafNode(line)
   }
-  root := MerkleTree.Construct(leafs, len(lines))
+  tree := MerkleTree.InitTree();
+  root := MerkleTree.CreateMerkleTree(leafs, tree)
   fmt.Println("Root is: ", root)
 
   // split the file name to adhere to output format

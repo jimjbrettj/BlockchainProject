@@ -4,8 +4,8 @@ import (
 	"crypto/sha256"
 	"fmt"
 )
-type MerkleRoot struct {
-	Root      TreeNode
+type MerkleTree struct {
+	Root      []interface{}
 }
 
 type TreeNode struct {
@@ -37,20 +37,32 @@ func hash(l string, r string) string {
 	return string(hash[:])
 }
 
-func Construct(leafs []*LeafNode, size int) *TreeNode {
-	//odd := false
-	// Adds empty block if odd
-	root := TreeNode{}
-	if size % 2 != 0 {
-		//odd = true
-		node := LeafNode{}
-		node.Key = ""
-		node.Hash = ""
-		leafs = append(leafs, &node)
+func InitTree() *MerkleTree {
+	MerkleTree := MerkleTree{}
+	return &MerkleTree
+}
+
+
+func CreateMerkleTree(leafs []*LeafNode, tree *MerkleTree) *TreeNode{
+	// 1) Add all leaf nodes to root[0]
+	root := tree.Root[0].([]*LeafNode)
+	//tree.Root[0] = leafs
+	for i := 0; i < len(leafs); i++ {
+		root[i] = leafs[i]
+		fmt.Println(root[i])
 	}
 
-	for i := 0; i < len(leafs); i++{
-		fmt.Println(i, leafs[i].Key)
-	}
-	return &root
+	// 2) While root[0].length > 1
+		// Create temp array of Nodes
+
+		// For i = 0; i < root[0].length; i += 2
+			// if (i < root[0].length - 1 && i % 2 == 0)
+				// Create new node with hash of i and i+1 nodes
+			// else
+				// Create and push node at i
+			// Push temp array to front of root
+
+	// return the root of the tree
+	node := TreeNode{}
+	return &node
 }
