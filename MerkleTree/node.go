@@ -2,10 +2,9 @@ package MerkleTree
 
 import (
 	"crypto/sha256"
-	"fmt"
 )
-type MerkleTree struct {
-	Root      []interface{}
+type Trie struct {
+	Root      interface{}
 }
 
 type TreeNode struct {
@@ -30,6 +29,7 @@ func CreateLeafNode(key string) *LeafNode {
 	return &node
 }
 
+// Concats 2 strings and takes the hash of it
 func hash(l string, r string) string {
 	s := l + r
 	data := []byte(s)
@@ -37,32 +37,43 @@ func hash(l string, r string) string {
 	return string(hash[:])
 }
 
-func InitTree() *MerkleTree {
-	MerkleTree := MerkleTree{}
-	return &MerkleTree
+// Init empty trie
+func CreateTrie() *Trie {
+	Trie := Trie{}
+	return &Trie
 }
 
-
-func CreateMerkleTree(leafs []*LeafNode, tree *MerkleTree) *TreeNode{
-	// 1) Add all leaf nodes to root[0]
-	root := tree.Root[0].([]*LeafNode)
-	//tree.Root[0] = leafs
-	for i := 0; i < len(leafs); i++ {
-		root[i] = leafs[i]
-		fmt.Println(root[i])
+func Construct(leafs []*LeafNode, trie *Trie) {
+	for i := range leafs {
+		Insert(leafs[i], trie)
 	}
+}
 
-	// 2) While root[0].length > 1
-		// Create temp array of Nodes
-
-		// For i = 0; i < root[0].length; i += 2
-			// if (i < root[0].length - 1 && i % 2 == 0)
-				// Create new node with hash of i and i+1 nodes
-			// else
-				// Create and push node at i
-			// Push temp array to front of root
-
-	// return the root of the tree
-	node := TreeNode{}
-	return &node
+func Insert(leaf *LeafNode, trie *Trie) {
+	//fmt.Println(leaf.Key)
+	if trie.Root == nil {
+		trie.Root = leaf
+		//fmt.Println("Root: ", trie.Root.(*LeafNode).Key)
+	} else {
+		switch trie.Root.(type) {
+			case *LeafNode:
+				//fmt.Println("Leaf")
+				node := TreeNode{}
+				node.Hash = hash(trie.Root.(*LeafNode).Hash, leaf.Hash)
+				node.RightEdge = ""
+				node.LeftEdge = ""
+				if trie.Root.(*LeafNode).Key < leaf.Key {
+					node.Left = trie.Root
+					node.Right = leaf
+				} else {
+					node.Right = trie.Root
+					node.Left = leaf
+				}
+				trie.Root = node
+				//fmt.Println("Root left: ", trie.Root.(TreeNode).Left.(*LeafNode).Key)
+				//fmt.Println("Root right: ", trie.Root.(TreeNode).Right.(*LeafNode).Key)
+			case *TreeNode:
+				//fmt.Println("Tree")
+		}
+	}
 }
