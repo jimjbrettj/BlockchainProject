@@ -1,8 +1,2 @@
-ant
-act
-acu
-anz
-bad
-bat
-bit
-bic
+aa
+ca

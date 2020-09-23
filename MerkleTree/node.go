@@ -2,9 +2,10 @@ package MerkleTree
 
 import (
 	"crypto/sha256"
+	"fmt"
 )
 type Trie struct {
-	Root      interface{}
+	Root      *TreeNode
 }
 
 type TreeNode struct {
@@ -49,31 +50,31 @@ func Construct(leafs []*LeafNode, trie *Trie) {
 	}
 }
 
+func findPrefix(s1 string, s2 string) string {
+	return ""
+}
+
 func Insert(leaf *LeafNode, trie *Trie) {
-	//fmt.Println(leaf.Key)
 	if trie.Root == nil {
-		trie.Root = leaf
-		//fmt.Println("Root: ", trie.Root.(*LeafNode).Key)
+		node := TreeNode{}
+		node.Hash = leaf.Hash
+		node.RightEdge = ""
+		node.LeftEdge = leaf.Key
+		node.Left = leaf
+		node.Right = nil
+		trie.Root = &node
 	} else {
-		switch trie.Root.(type) {
-			case *LeafNode:
-				//fmt.Println("Leaf")
-				node := TreeNode{}
-				node.Hash = hash(trie.Root.(*LeafNode).Hash, leaf.Hash)
-				node.RightEdge = ""
-				node.LeftEdge = ""
-				if trie.Root.(*LeafNode).Key < leaf.Key {
-					node.Left = trie.Root
-					node.Right = leaf
-				} else {
-					node.Right = trie.Root
-					node.Left = leaf
-				}
-				trie.Root = node
-				//fmt.Println("Root left: ", trie.Root.(TreeNode).Left.(*LeafNode).Key)
-				//fmt.Println("Root right: ", trie.Root.(TreeNode).Right.(*LeafNode).Key)
-			case *TreeNode:
-				//fmt.Println("Tree")
+		if trie.Root.Right == nil && trie.Root.RightEdge < leaf.Key {
+			fmt.Println("Made it here")
+			trie.Root.Right = leaf
+			trie.Root.RightEdge = leaf.Key
+			switch t := trie.Root.Left.(type) {
+				default: fmt.Println("Type is: ", t)
+				case *LeafNode:
+					trie.Root.Hash = hash(trie.Root.Left.(*LeafNode).Hash, leaf.Hash)
+				case *TreeNode:
+					trie.Root.Hash = hash(trie.Root.Left.(*TreeNode).Hash, leaf.Hash)
+			}
 		}
 	}
 }

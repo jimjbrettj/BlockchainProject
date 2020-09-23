@@ -60,19 +60,16 @@ func writeTree(root *MerkleTree.TreeNode, file *os.File) bool {
 }
 
 func print(root interface{}) {
-  if root == nil {
-    fmt.Println("Tree is empty")
-    return
-  }
   switch root.(type) {
     case *MerkleTree.LeafNode:
       fmt.Println("Leaf: ", root.(*MerkleTree.LeafNode).Key)
-    case MerkleTree.TreeNode:
-      fmt.Println("Tree: ", root.(MerkleTree.TreeNode).Hash)
-      print(root.(MerkleTree.TreeNode).Left)
-      print(root.(MerkleTree.TreeNode).Right)
-    default:
-      fmt.Println("Type not found, cannot print")
+    case *MerkleTree.TreeNode:
+      fmt.Println("Tree: ", root.(*MerkleTree.TreeNode).Hash)
+      if root.(*MerkleTree.TreeNode).Hash == root.(*MerkleTree.TreeNode).Left.(*MerkleTree.LeafNode).Hash {
+        fmt.Println("Hashes are equal")
+      }
+      print(root.(*MerkleTree.TreeNode).Left)
+      print(root.(*MerkleTree.TreeNode).Right)
   }
 
 }
