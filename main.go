@@ -7,7 +7,6 @@ import (
   "log"
   "os"
   "sort"
-  "strings"
 )
 
 func readFile(filename string) ([]string, error) {
@@ -60,6 +59,20 @@ func writeTree(root *MerkleTree.TreeNode, file *os.File) bool {
   return false
 }
 
+func print(root interface{}) {
+  switch root.(type) {
+    case *MerkleTree.LeafNode:
+      fmt.Println("Leaf: ", root.(*MerkleTree.LeafNode).Key)
+    case *MerkleTree.TreeNode:
+      fmt.Println("TreeHash: ", root.(*MerkleTree.TreeNode).Hash)
+      fmt.Println("TreeLeft: ", root.(*MerkleTree.TreeNode).LeftEdge)
+      fmt.Println("TreeRight: ", root.(*MerkleTree.TreeNode).RightEdge)
+      fmt.Println()
+      print(root.(*MerkleTree.TreeNode).Left)
+      print(root.(*MerkleTree.TreeNode).Right)
+  }
+}
+
 func main() {
   fmt.Print("Enter the filename: ")
   var filename string
@@ -72,27 +85,34 @@ func main() {
   }
   sort.Strings(lines)
 
+  // Create array of constructed lead nodes
   leafs := make([]*MerkleTree.LeafNode, len(lines))
   for i, line := range lines {
     leafs[i] = MerkleTree.CreateLeafNode(line)
   }
-  root := MerkleTree.Construct(leafs, len(lines))
-  fmt.Println("Root is: ", root)
+  trie := MerkleTree.CreateTrie()
+  MerkleTree.Construct(leafs, trie)
+  fmt.Println("Root left edge: ", trie.Root.LeftEdge)
+  fmt.Println("Root right edge: ", trie.Root.RightEdge)
+  fmt.Println("Left leftedge: ", trie.Root.Left.(MerkleTree.TreeNode).LeftEdge)
+  fmt.Println("Left rightedge: ", trie.Root.Left.(MerkleTree.TreeNode).RightEdge)
 
-  // split the file name to adhere to output format
-  splitFile := strings.Split(filename, ".")
-  outFile := splitFile[0] + ".out.txt"
-  // Create the file to write to
-  file, err := os.Create(outFile)
-  // Make sure creation completed
-  if err != nil {
-    log.Fatal(err)
-  }
-  // Set the file to close when finished
-  defer file.Close()
+  //print(trie.Root)
 
-  array := []string{"first", "second", "third", "fourth", "fifth"}
-  printed := writeArray(array, file)
-
-  fmt.Println("Success? ", printed)
+  //// split the file name to adhere to output format
+  //splitFile := strings.Split(filename, ".")
+  //outFile := splitFile[0] + ".out.txt"
+  //// Create the file to write to
+  //file, err := os.Create(outFile)
+  //// Make sure creation completed
+  //if err != nil {
+  //  log.Fatal(err)
+  //}
+  //// Set the file to close when finished
+  //defer file.Close()
+  //
+  //array := []string{"first", "second", "third", "fourth", "fifth"}
+  //printed := writeArray(array, file)
+  //
+  //fmt.Println("Success? ", printed)
 }
