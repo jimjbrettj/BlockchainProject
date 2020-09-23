@@ -64,7 +64,10 @@ func print(root interface{}) {
     case *MerkleTree.LeafNode:
       fmt.Println("Leaf: ", root.(*MerkleTree.LeafNode).Key)
     case *MerkleTree.TreeNode:
-      fmt.Println("Tree: ", root.(*MerkleTree.TreeNode).Hash)
+      fmt.Println("TreeHash: ", root.(*MerkleTree.TreeNode).Hash)
+      fmt.Println("TreeLeft: ", root.(*MerkleTree.TreeNode).LeftEdge)
+      fmt.Println("TreeRight: ", root.(*MerkleTree.TreeNode).RightEdge)
+      fmt.Println()
       print(root.(*MerkleTree.TreeNode).Left)
       print(root.(*MerkleTree.TreeNode).Right)
   }
@@ -89,6 +92,11 @@ func main() {
   }
   trie := MerkleTree.CreateTrie()
   MerkleTree.Construct(leafs, trie)
+  fmt.Println("Root left edge: ", trie.Root.LeftEdge)
+  fmt.Println("Root right edge: ", trie.Root.RightEdge)
+  fmt.Println("Left leftedge: ", trie.Root.Left.(MerkleTree.TreeNode).LeftEdge)
+  fmt.Println("Left rightedge: ", trie.Root.Left.(MerkleTree.TreeNode).RightEdge)
+
   //print(trie.Root)
 
   //// split the file name to adhere to output format
