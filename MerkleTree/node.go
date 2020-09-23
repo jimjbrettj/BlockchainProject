@@ -2,7 +2,9 @@ package MerkleTree
 
 import (
 	"crypto/sha256"
+	"fmt"
 )
+
 type Trie struct {
 	Root      *TreeNode
 }
@@ -45,25 +47,49 @@ func CreateTrie() *Trie {
 
 func Construct(leafs []*LeafNode, trie *Trie) {
 	for i := range leafs {
-		Insert(leafs[i], trie)
+		Insert(leafs[i], leafs[i].Key, "", trie)
 	}
 }
 
-func findPrefix(s1 string, s2 string) string {
-	return ""
+func min(a int, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
-func Insert(leaf *LeafNode, trie *Trie) {
+func findIndex(s1 string, s2 string) int {
+	i := 0
+	min := min(len(s1), len(s2))
+	for i < min {
+		if s1[i] == s2[i] {
+			i++
+		} else {
+			return i
+		}
+	}
+	return i
+}
+
+func Insert(leaf *LeafNode, key string, prefix string, trie *Trie) {
 	// If tree empty, insert at root
 	if trie.Root == nil {
 		node := TreeNode{}
 		node.Hash = leaf.Hash
 		node.RightEdge = ""
-		node.LeftEdge = leaf.Key
+		node.LeftEdge = key
 		node.Left = leaf
 		node.Right = nil
 		trie.Root = &node
 	} else {
+		// Check gcs on left
+		fmt.Println("s1: ", key)
+		fmt.Println("s2: ", trie.Root.LeftEdge)
+		leftIndex := findIndex(key, trie.Root.LeftEdge)
+		fmt.Println("Index: ", leftIndex)
+		// CHeck again on right
+		// If both are 0, create extension node. Insert left
+
 		// Check if right is null
 		if trie.Root.Right == nil && trie.Root.RightEdge < leaf.Key {
 			trie.Root.Right = leaf

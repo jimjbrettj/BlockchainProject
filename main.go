@@ -68,7 +68,6 @@ func print(root interface{}) {
       print(root.(*MerkleTree.TreeNode).Left)
       print(root.(*MerkleTree.TreeNode).Right)
   }
-
 }
 
 func main() {
@@ -90,11 +89,7 @@ func main() {
   }
   trie := MerkleTree.CreateTrie()
   MerkleTree.Construct(leafs, trie)
-  if trie.Root.Hash == (MerkleTree.Hash(trie.Root.Left.(*MerkleTree.LeafNode).Key, trie.Root.Right.(*MerkleTree.LeafNode).Key)) {
-    fmt.Println("The hashes are equal hype!")
-  }
-
-  print(trie.Root)
+  //print(trie.Root)
 
   //// split the file name to adhere to output format
   //splitFile := strings.Split(filename, ".")
