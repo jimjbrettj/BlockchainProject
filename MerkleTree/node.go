@@ -73,6 +73,97 @@ func findIndex(s1 string, s2 string) int {
 	return i
 }
 
+func GetNodesHash(node interface{}) string {
+	switch node.(type) {
+	case *LeafNode:
+		return node.(*LeafNode).Key
+	case *TreeNode:
+		return node.(*TreeNode).Hash
+	}
+	return ""
+}
+
+func BelongsLeft(key string, branch string) bool {
+	return key[0] == branch[0];
+}
+
+func RecursiveInsert(leaf *LeafNode, trie *Trie) {
+	// If root is nil, insert leaf as left child
+	if trie.Root == nil {
+		// Create TreeNode for root
+		node := TreeNode{}
+		node.Hash = leaf.Hash
+		// Insert leaf node as left child
+		node.Left = leaf
+		node.LeftEdge = leaf.Key
+		// Make nil right child
+		node.Right = nil
+		node.RightEdge = ""
+		// Set root node
+		trie.Root = &node
+	} else {
+		// Otherwise: decide if node belongs to left or right subtree
+		if (BelongsLeft(leaf.Key, trie.Root.LeftEdge)) {
+			// LeafNode belongs to the left subtree
+			index := findIndex(leaf.Key, trie.Root.LeftEdge)
+			newNode := InsertHelper(leaf, trie, trie.Root.Left, index)
+			trie.Root.Left = newNode
+			trie.Root.LeftEdge = leaf.Key[:index]
+			// Set the hash value of the root node
+			if trie.Root.Right == nil {
+				trie.Root.Hash = newNode.Hash
+			} else {
+				trie.Root.Hash = Hash(newNode.Hash, GetNodesHash(trie.Root.Right))
+			}
+		} else {
+			// LeafNode belongs to the right subtree
+			// If no right branch, insert leaf
+			if trie.Root.Right == nil {
+				trie.Root.Right = leaf
+				trie.Root.RightEdge = leaf.Key
+				// Set the hash value of the root node
+				trie.Root.Hash = Hash(GetNodesHash(trie.Root.Left), leaf.Key)
+			} else {
+				index := findIndex(leaf.Key, trie.Root.RightEdge)
+				newNode := InsertHelper(leaf, trie, trie.Root.Right, index)
+				trie.Root.Right = newNode
+				trie.Root.RightEdge = leaf.Key[:index]
+				// Set the hash value of the root node
+				trie.Root.Hash = Hash(GetNodesHash(trie.Root.Left), newNode.Hash)
+			}
+		}
+	}
+}
+
+func InsertHelper(leaf *LeafNode, trie *Trie, currentNode interface{}, index int) TreeNode {
+	// Check if the current node is a leaf or a tree node
+	switch currentNode.(type) {
+		case *LeafNode:
+			return TreeNodeFromLeaves(leaf, currentNode.(*LeafNode), index)
+		case *TreeNode:
+			// TODO
+	}
+	return currentNode.(TreeNode)
+}
+
+func TreeNodeFromLeaves(leaf1 *LeafNode, leaf2 *LeafNode, index int) TreeNode {
+	treeNode := TreeNode{}
+	if (leaf1.Key[index] < leaf2.Key[index]) {
+		treeNode.Left = leaf1
+		treeNode.Right = leaf2
+		treeNode.LeftEdge = leaf1.Key[index:]
+		treeNode.RightEdge = leaf2.Key[index:]
+		treeNode.Hash = Hash(leaf1.Key, leaf2.Key)
+	} else {
+		treeNode.Right = leaf1
+		treeNode.Left = leaf2
+		treeNode.RightEdge = leaf1.Key[index:]
+		treeNode.LeftEdge = leaf2.Key[index:]
+		treeNode.Hash = Hash(leaf2.Key, leaf1.Key)
+	}
+	return treeNode
+}
+
 // Currently not hashing as I go. Either need to add that logic or hash at the end. Honestly might be best to do at end.
 func Insert(leaf *LeafNode, key string, prefix string, trie *Trie) {
 	/*
