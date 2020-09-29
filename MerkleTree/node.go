@@ -2,6 +2,7 @@ package MerkleTree
 
 import (
 	"crypto/sha256"
+	"fmt"
 )
 
 type Trie struct {
@@ -47,7 +48,7 @@ func CreateTrie() *Trie {
 // Constructs the trie. Ideally will return the root or the trie itself
 func Construct(leafs []*LeafNode, trie *Trie) {
 	for i := range leafs {
-		Insert(leafs[i], leafs[i].Key, "", trie)
+		RecursiveInsert(leafs[i], trie)
 	}
 }
 
@@ -83,7 +84,7 @@ func GetNodesHash(node interface{}) string {
 	return ""
 }
 
-func BelongsLeft(key string, branch string) bool {
+func Belongs(key string, branch string) bool {
 	return key[0] == branch[0];
 }
 
@@ -103,10 +104,10 @@ func RecursiveInsert(leaf *LeafNode, trie *Trie) {
 		trie.Root = &node
 	} else {
 		// Otherwise: decide if node belongs to left or right subtree
-		if (BelongsLeft(leaf.Key, trie.Root.LeftEdge)) {
+		if (Belongs(leaf.Key, trie.Root.LeftEdge)) {
 			// LeafNode belongs to the left subtree
 			index := findIndex(leaf.Key, trie.Root.LeftEdge)
-			newNode := InsertHelper(leaf, trie, trie.Root.Left, index)
+			newNode := InsertHelper(leaf, trie, trie.Root.Left, index, trie.Root.LeftEdge[index:])
 			trie.Root.Left = newNode
 			trie.Root.LeftEdge = leaf.Key[:index]
 			// Set the hash value of the root node
@@ -125,7 +126,7 @@ func RecursiveInsert(leaf *LeafNode, trie *Trie) {
 				trie.Root.Hash = Hash(GetNodesHash(trie.Root.Left), leaf.Key)
 			} else {
 				index := findIndex(leaf.Key, trie.Root.RightEdge)
-				newNode := InsertHelper(leaf, trie, trie.Root.Right, index)
+				newNode := InsertHelper(leaf, trie, trie.Root.Right, index, trie.Root.RightEdge[index:])
 				trie.Root.Right = newNode
 				trie.Root.RightEdge = leaf.Key[:index]
 				// Set the hash value of the root node
@@ -135,13 +136,56 @@ func RecursiveInsert(leaf *LeafNode, trie *Trie) {
 	}
 }
 
-func InsertHelper(leaf *LeafNode, trie *Trie, currentNode interface{}, index int) TreeNode {
+func InsertHelper(leaf *LeafNode, trie *Trie, currentNode interface{}, index int, postfix string) TreeNode {
+	// TODO: Postfix does not work properly.  My plan was for it to be used when a null string has to be used to decide which branch gets extended.  len(postfix) > 0 means left, else right
+	fmt.Println(leaf.Key + " " + postfix) // Temp print statement
 	// Check if the current node is a leaf or a tree node
 	switch currentNode.(type) {
 		case *LeafNode:
 			return TreeNodeFromLeaves(leaf, currentNode.(*LeafNode), index)
 		case *TreeNode:
-			// TODO
+			subKey := postfix + leaf.Key[index:]
+			currTreeNode := currentNode.(TreeNode)
+			// Decide if the node belongs to the left branch
+			if Belongs(subKey, currTreeNode.LeftEdge) {
+				nextIndex := findIndex(subKey, currTreeNode.LeftEdge)
+				childNode := InsertHelper(leaf, trie, currTreeNode.Left, nextIndex, currTreeNode.LeftEdge[nextIndex:])
+				currTreeNode.Left = childNode
+				currTreeNode.LeftEdge = subKey[:nextIndex]
+				// Set the hash value of the current node
+				if currTreeNode.Right == nil {
+					currTreeNode.Hash = childNode.Hash
+				} else {
+					currTreeNode.Hash = Hash(childNode.Hash, GetNodesHash(currTreeNode.Right))
+				}
+				return currTreeNode
+			} else if currTreeNode.Right == nil {
+				// If the right child of the current node is nil, we can insert it
+				currTreeNode.Right = leaf
+				currTreeNode.RightEdge = subKey
+				// Set the hash value of the current node
+				currTreeNode.Hash = Hash(GetNodesHash(currTreeNode.Left), leaf.Key)
+				return currTreeNode
+			} else if len(postfix) > 0 {
+				// This doesn't work
+				/*
+				// need to extend the branch
+				newCurrentNode := TreeNode{}
+				newCurrentNode.Left = currTreeNode
+				newCurrentNode.LeftEdge = postfix
+				newCurrentNode.Right = leaf
+				newCurrentNode.RightEdge = leaf.Key[index:]
+				newCurrentNode.Hash = Hash(currTreeNode.Hash, leaf.Key)
+				return newCurrentNode
+				*/
+			} else {
+				childNode := InsertHelper(leaf, trie, currTreeNode.Right, index, "")
+				currTreeNode.Right = childNode
+				currTreeNode.RightEdge = ""
+				currTreeNode.Hash = Hash(GetNodesHash(currTreeNode.Left), GetNodesHash(currTreeNode.Right))
+				return currTreeNode
+			}
+			return currTreeNode
 	}
 	return currentNode.(TreeNode)
 }
