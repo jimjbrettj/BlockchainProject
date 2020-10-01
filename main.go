@@ -7,6 +7,9 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strconv"
+	"strings"
+	"time"
 )
 
 func readFile(filename string) ([]string, error) {
@@ -74,45 +77,94 @@ func print(root interface{}) {
 }
 
 func main() {
-	fmt.Print("Enter the filename: ")
-	var filename string
-	fmt.Scanln(&filename)
-	fmt.Println("Filename is: " + filename)
+	chain := MerkleTree.CreateChain()
+	var first *string
+	var lastBlock *MerkleTree.Block
+	for {
+		fmt.Print("Enter the filename or 'done' to exit: ")
+		var filename string
+		_, _ = fmt.Scanln(&filename)
+		if filename == "done" {
+			break
+		}
+		if first == nil {
+			first = &filename
+		}
+		fmt.Println("Filename is: " + filename)
 
-	lines, err := readFile(filename)
+		lines, err := readFile(filename)
+		if err != nil {
+			log.Fatal(err)
+		}
+		sort.Strings(lines)
+
+		// Create array of constructed lead nodes
+		leafs := make([]*MerkleTree.LeafNode, len(lines))
+		for i, line := range lines {
+			leafs[i] = MerkleTree.CreateLeafNode(line)
+		}
+		trie := MerkleTree.CreateTrie()
+		block := MerkleTree.CreateBlock()
+		//block.Difficulty == ??
+		//block.Nonce == ??
+		MerkleTree.Construct(leafs, trie)
+		block.Tree = trie
+		block.TreeHeadHash = trie.Root.Hash
+		block.TimeStamp = uint64(time.Now().Unix())
+		if lastBlock == nil {
+			block.PreviousHash = "0"
+		} else {
+			block.PreviousHash = lastBlock.TreeHeadHash
+		}
+		lastBlock = block
+		chain.Next = MerkleTree.CreateChain()
+		chain.Next.Previous = chain
+		chain.Block = block
+		chain = chain.Next
+	}
+	if first == nil {
+		return
+	}
+	chain = chain.Previous //Rewind due to pre creating and linking to the next node above
+
+	// split the file name to adhere to output format
+	splitFile := strings.Split(*first, ".")
+	outFile := splitFile[0] + ".block.out"
+	// Create the file to write to
+	file, err := os.Create(outFile)
+	// Make sure creation completed
 	if err != nil {
 		log.Fatal(err)
 	}
-	sort.Strings(lines)
+	// Set the file to close when finished
+	for {
+		currentBlock := chain.Block
+		if currentBlock == nil {
+			break
+		}
 
-	// Create array of constructed lead nodes
-	leafs := make([]*MerkleTree.LeafNode, len(lines))
-	for i, line := range lines {
-		leafs[i] = MerkleTree.CreateLeafNode(line)
+		printBlock(file, currentBlock)
+		if chain.Previous != nil {
+			chain = chain.Previous
+			continue
+		} else {
+			break
+		}
+
 	}
-	trie := MerkleTree.CreateTrie()
-	MerkleTree.Construct(leafs, trie)
-	fmt.Println("Root left edge: ", trie.Root.LeftEdge)
-	fmt.Println("Root right edge: ", trie.Root.RightEdge)
-	fmt.Println("Left leftedge: ", trie.Root.Left.(MerkleTree.TreeNode).LeftEdge)
-	fmt.Println("Left rightedge: ", trie.Root.Left.(MerkleTree.TreeNode).RightEdge)
+	defer file.Close()
 
-	//print(trie.Root)
+}
 
-	//// split the file name to adhere to output format
-	//splitFile := strings.Split(filename, ".")
-	//outFile := splitFile[0] + ".out.txt"
-	//// Create the file to write to
-	//file, err := os.Create(outFile)
-	//// Make sure creation completed
-	//if err != nil {
-	//  log.Fatal(err)
-	//}
-	//// Set the file to close when finished
-	//defer file.Close()
-	//
-	//array := []string{"first", "second", "third", "fourth", "fifth"}
-	//printed := writeArray(array, file)
-	//
-	//fmt.Println("Success? ", printed)
+func printBlock(file *os.File, block *MerkleTree.Block) {
+	file.WriteString("BEGIN BLOCK\n")
+	file.WriteString("BEGIN HEADER\n")
+	file.WriteString(block.PreviousHash + "\n")
+	file.WriteString(block.TreeHeadHash + "\n")
+	file.WriteString(strconv.FormatUint(block.TimeStamp, 10) + "\n")
+	file.WriteString(strconv.FormatUint(block.Difficulty, 10) + "\n")
+	file.WriteString(strconv.FormatUint(uint64(block.Nonce), 10) + "\n")
+	file.WriteString("END HEADER\n")
+	file.WriteString("END BLOCK\n\n")
+
 }
