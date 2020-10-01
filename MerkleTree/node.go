@@ -168,7 +168,6 @@ func InsertHelper(leaf *LeafNode, trie *Trie, currentNode interface{}, index int
 				return currTreeNode
 			} else if len(postfix) > 0 {
 				// This doesn't work
-				/*
 				// need to extend the branch
 				newCurrentNode := TreeNode{}
 				newCurrentNode.Left = currTreeNode
@@ -177,7 +176,6 @@ func InsertHelper(leaf *LeafNode, trie *Trie, currentNode interface{}, index int
 				newCurrentNode.RightEdge = leaf.Key[index:]
 				newCurrentNode.Hash = Hash(currTreeNode.Hash, leaf.Key)
 				return newCurrentNode
-				*/
 			} else {
 				childNode := InsertHelper(leaf, trie, currTreeNode.Right, index, "")
 				currTreeNode.Right = childNode
@@ -185,7 +183,6 @@ func InsertHelper(leaf *LeafNode, trie *Trie, currentNode interface{}, index int
 				currTreeNode.Hash = Hash(GetNodesHash(currTreeNode.Left), GetNodesHash(currTreeNode.Right))
 				return currTreeNode
 			}
-			return currTreeNode
 	}
 	return currentNode.(TreeNode)
 }
