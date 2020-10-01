@@ -2,6 +2,7 @@ package MerkleTree
 
 import (
 	"crypto/sha256"
+	"fmt"
 )
 
 type Trie struct {
@@ -47,7 +48,7 @@ func CreateTrie() *Trie {
 // Constructs the trie. Ideally will return the root or the trie itself
 func Construct(leafs []*LeafNode, trie *Trie) {
 	for i := range leafs {
-		Insert(leafs[i], leafs[i].Key, "", trie)
+		RecursiveInsert(leafs[i], trie)
 	}
 }
 
@@ -71,6 +72,137 @@ func findIndex(s1 string, s2 string) int {
 		}
 	}
 	return i
+}
+
+func GetNodesHash(node interface{}) string {
+	switch node.(type) {
+	case *LeafNode:
+		return node.(*LeafNode).Key
+	case *TreeNode:
+		return node.(*TreeNode).Hash
+	}
+	return ""
+}
+
+func Belongs(key string, branch string) bool {
+	return key[0] == branch[0];
+}
+
+func RecursiveInsert(leaf *LeafNode, trie *Trie) {
+	// If root is nil, insert leaf as left child
+	if trie.Root == nil {
+		// Create TreeNode for root
+		node := TreeNode{}
+		node.Hash = leaf.Hash
+		// Insert leaf node as left child
+		node.Left = leaf
+		node.LeftEdge = leaf.Key
+		// Make nil right child
+		node.Right = nil
+		node.RightEdge = ""
+		// Set root node
+		trie.Root = &node
+	} else {
+		// Otherwise: decide if node belongs to left or right subtree
+		if (Belongs(leaf.Key, trie.Root.LeftEdge)) {
+			// LeafNode belongs to the left subtree
+			index := findIndex(leaf.Key, trie.Root.LeftEdge)
+			newNode := InsertHelper(leaf, trie, trie.Root.Left, index, trie.Root.LeftEdge[index:])
+			trie.Root.Left = newNode
+			trie.Root.LeftEdge = leaf.Key[:index]
+			// Set the hash value of the root node
+			if trie.Root.Right == nil {
+				trie.Root.Hash = newNode.Hash
+			} else {
+				trie.Root.Hash = Hash(newNode.Hash, GetNodesHash(trie.Root.Right))
+			}
+		} else {
+			// LeafNode belongs to the right subtree
+			// If no right branch, insert leaf
+			if trie.Root.Right == nil {
+				trie.Root.Right = leaf
+				trie.Root.RightEdge = leaf.Key
+				// Set the hash value of the root node
+				trie.Root.Hash = Hash(GetNodesHash(trie.Root.Left), leaf.Key)
+			} else {
+				index := findIndex(leaf.Key, trie.Root.RightEdge)
+				newNode := InsertHelper(leaf, trie, trie.Root.Right, index, trie.Root.RightEdge[index:])
+				trie.Root.Right = newNode
+				trie.Root.RightEdge = leaf.Key[:index]
+				// Set the hash value of the root node
+				trie.Root.Hash = Hash(GetNodesHash(trie.Root.Left), newNode.Hash)
+			}
+		}
+	}
+}
+
+func InsertHelper(leaf *LeafNode, trie *Trie, currentNode interface{}, index int, postfix string) TreeNode {
+	// TODO: Postfix does not work properly.  My plan was for it to be used when a null string has to be used to decide which branch gets extended.  len(postfix) > 0 means left, else right
+	fmt.Println(leaf.Key + " " + postfix) // Temp print statement
+	// Check if the current node is a leaf or a tree node
+	switch currentNode.(type) {
+		case *LeafNode:
+			return TreeNodeFromLeaves(leaf, currentNode.(*LeafNode), index)
+		case *TreeNode:
+			subKey := postfix + leaf.Key[index:]
+			currTreeNode := currentNode.(TreeNode)
+			// Decide if the node belongs to the left branch
+			if Belongs(subKey, currTreeNode.LeftEdge) {
+				nextIndex := findIndex(subKey, currTreeNode.LeftEdge)
+				childNode := InsertHelper(leaf, trie, currTreeNode.Left, nextIndex, currTreeNode.LeftEdge[nextIndex:])
+				currTreeNode.Left = childNode
+				currTreeNode.LeftEdge = subKey[:nextIndex]
+				// Set the hash value of the current node
+				if currTreeNode.Right == nil {
+					currTreeNode.Hash = childNode.Hash
+				} else {
+					currTreeNode.Hash = Hash(childNode.Hash, GetNodesHash(currTreeNode.Right))
+				}
+				return currTreeNode
+			} else if currTreeNode.Right == nil {
+				// If the right child of the current node is nil, we can insert it
+				currTreeNode.Right = leaf
+				currTreeNode.RightEdge = subKey
+				// Set the hash value of the current node
+				currTreeNode.Hash = Hash(GetNodesHash(currTreeNode.Left), leaf.Key)
+				return currTreeNode
+			} else if len(postfix) > 0 {
+				// This doesn't work
+				// need to extend the branch
+				newCurrentNode := TreeNode{}
+				newCurrentNode.Left = currTreeNode
+				newCurrentNode.LeftEdge = postfix
+				newCurrentNode.Right = leaf
+				newCurrentNode.RightEdge = leaf.Key[index:]
+				newCurrentNode.Hash = Hash(currTreeNode.Hash, leaf.Key)
+				return newCurrentNode
+			} else {
+				childNode := InsertHelper(leaf, trie, currTreeNode.Right, index, "")
+				currTreeNode.Right = childNode
+				currTreeNode.RightEdge = ""
+				currTreeNode.Hash = Hash(GetNodesHash(currTreeNode.Left), GetNodesHash(currTreeNode.Right))
+				return currTreeNode
+			}
+	}
+	return currentNode.(TreeNode)
+}
+
+func TreeNodeFromLeaves(leaf1 *LeafNode, leaf2 *LeafNode, index int) TreeNode {
+	treeNode := TreeNode{}
+	if (leaf1.Key[index] < leaf2.Key[index]) {
+		treeNode.Left = leaf1
+		treeNode.Right = leaf2
+		treeNode.LeftEdge = leaf1.Key[index:]
+		treeNode.RightEdge = leaf2.Key[index:]
+		treeNode.Hash = Hash(leaf1.Key, leaf2.Key)
+	} else {
+		treeNode.Right = leaf1
+		treeNode.Left = leaf2
+		treeNode.RightEdge = leaf1.Key[index:]
+		treeNode.LeftEdge = leaf2.Key[index:]
+		treeNode.Hash = Hash(leaf2.Key, leaf1.Key)
+	}
+	return treeNode
 }
 
 // Currently not hashing as I go. Either need to add that logic or hash at the end. Honestly might be best to do at end.
