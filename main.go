@@ -168,19 +168,19 @@ func write_tree(trie *Trie) {
 
 	// this first 'if' should be a for in x < depth, could we pass depth?
 	if trie.Root != nil {
-		_, err2 := f.WriteString(trie.Root)
+		_, err2 := fmt.fprintf(f, trie.Root)
 		if err2 != nil {
 			log.Fatal(err2)
 		}
 		if trie.Root.Left {
-			_, err3 := f.WriteString(trie.Left)
+			_, err3 := fmt.fprintf(f, trie.Left)
 
 			if err3 != nil {
 				log.Fatal(err3)
 			}
 		}
 		if trie.Root.Right {
-			_, err4 := f.WriteString(trie.Right)
+			_, err4 := fmt.fprintf(f, trie.Right)
 
 			if err4 != nil {
 				log.Fatal(err4)
