@@ -156,6 +156,44 @@ func main() {
 
 }
 
+func write_tree(trie *Trie) {
+	var depth = 1 // two possible children
+	var null_flag = false // break the while loop at depth of 0 children
+	
+	f, err := os.Create("merkle_tree.txt") // init txt
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	// this first 'if' should be a for in x < depth, could we pass depth?
+	if trie.Root != nil {
+		_, err2 := f.WriteString(trie.Root)
+		if err2 != nil {
+			log.Fatal(err2)
+		}
+		if trie.Root.Left {
+			_, err3 := f.WriteString(trie.Left)
+
+			if err3 != nil {
+				log.Fatal(err3)
+			}
+		}
+		if trie.Root.Right {
+			_, err4 := f.WriteString(trie.Right)
+
+			if err4 != nil {
+				log.Fatal(err4)
+			}
+		}
+
+
+		depth++
+
+		// if no child nodes null_flag = true
+	}
+}
+
 func printBlock(file *os.File, block *MerkleTree.Block) {
 	file.WriteString("BEGIN BLOCK\n")
 	file.WriteString("BEGIN HEADER\n")
@@ -165,6 +203,6 @@ func printBlock(file *os.File, block *MerkleTree.Block) {
 	file.WriteString(strconv.FormatUint(block.Difficulty, 10) + "\n")
 	file.WriteString(strconv.FormatUint(uint64(block.Nonce), 10) + "\n")
 	file.WriteString("END HEADER\n")
+	// write_tree
 	file.WriteString("END BLOCK\n\n")
-
 }
