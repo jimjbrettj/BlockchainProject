@@ -173,6 +173,7 @@ func write_tree(trie *Trie) {
 			if err2 != nil {
 				log.Fatal(err2)
 			}
+			
 			if trie.Root.Left {
 				_, err3 := fmt.fprintf(f, trie.Root.Left)
 
@@ -180,6 +181,7 @@ func write_tree(trie *Trie) {
 					log.Fatal(err3)
 				}
 			}
+
 			if trie.Root.Right {
 				_, err4 := fmt.fprintf(f, trie.Root.Right)
 
@@ -187,10 +189,12 @@ func write_tree(trie *Trie) {
 					log.Fatal(err4)
 				}
 			}
+
 			depth++
 			if trie.Root.Left == nil && trie.Root.Right == nil {
 				null_flag = true
 			}
+
 		}
 
 		if null_flag break
