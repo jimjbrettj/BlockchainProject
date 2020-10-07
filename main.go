@@ -197,6 +197,8 @@ func write_tree(trie *Trie) {
 
 		}
 
+		trie.Root = trie.Root.Left
+
 		if null_flag break
 	}
 }
