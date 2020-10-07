@@ -167,30 +167,33 @@ func write_tree(trie *Trie) {
 	defer f.Close()
 
 	// this first 'if' should be a for in x < depth, could we pass depth?
-	if trie.Root != nil {
-		_, err2 := fmt.fprintf(f, trie.Root)
-		if err2 != nil {
-			log.Fatal(err2)
-		}
-		if trie.Root.Left {
-			_, err3 := fmt.fprintf(f, trie.Left)
+	for {
+		if trie.Root != nil {
+			_, err2 := fmt.fprintf(f, trie.Root)
+			if err2 != nil {
+				log.Fatal(err2)
+			}
+			if trie.Root.Left {
+				_, err3 := fmt.fprintf(f, trie.Root.Left)
 
-			if err3 != nil {
-				log.Fatal(err3)
+				if err3 != nil {
+					log.Fatal(err3)
+				}
+			}
+			if trie.Root.Right {
+				_, err4 := fmt.fprintf(f, trie.Root.Right)
+
+				if err4 != nil {
+					log.Fatal(err4)
+				}
+			}
+			depth++
+			if trie.Root.Left == nil && trie.Root.Right == nil {
+				null_flag = true
 			}
 		}
-		if trie.Root.Right {
-			_, err4 := fmt.fprintf(f, trie.Right)
 
-			if err4 != nil {
-				log.Fatal(err4)
-			}
-		}
-
-
-		depth++
-
-		// if no child nodes null_flag = true
+		if null_flag break
 	}
 }
 
