@@ -113,6 +113,16 @@ func TreeNodeFromLeaves(leaf1 *LeafNode, leaf2 *LeafNode, index int) TreeNode {
 	return treeNode
 }
 
+func insertHelper(node interface{}, edge string, key string, index int, prefix int ) interface{} {
+	switch node.(type) {
+	case *LeafNode:
+		return nil
+	case *TreeNode:
+		return nil
+	}
+	return nil
+}
+
 // Currently not hashing as I go. Either need to add that logic or hash at the end. Honestly might be best to do at end.
 func Insert(node *TreeNode, key string, prefix int, trie *Trie) {
 	index := findIndex(key[prefix:], node.LeftEdge)
@@ -123,7 +133,7 @@ func Insert(node *TreeNode, key string, prefix int, trie *Trie) {
 				return
 			}
 			// TODO make insert helper
-			//node.Left = insertHelper(m, node.LeftEdge, key, index, prefix)
+			node.Left = insertHelper(m, node.LeftEdge, key, index, prefix)
 			node.LeftEdge = node.LeftEdge[:index]
 			return
 		case *TreeNode:
@@ -132,7 +142,7 @@ func Insert(node *TreeNode, key string, prefix int, trie *Trie) {
 				return
 			}
 			// TODO make insert helper
-			//node.Left = insertHelper(m, node.LeftEdge, key, index, prefix)
+			node.Left = insertHelper(m, node.LeftEdge, key, index, prefix)
 			node.LeftEdge = node.LeftEdge[:index]
 			return
 		}
@@ -146,7 +156,7 @@ func Insert(node *TreeNode, key string, prefix int, trie *Trie) {
 				return
 			}
 			// TODO make insert helper
-			//node.Right = insertHelper(m, node.RightEdge, key, index, prefix)
+			node.Right = insertHelper(m, node.RightEdge, key, index, prefix)
 			node.RightEdge = node.RightEdge[:index]
 			return
 		case *TreeNode:
@@ -155,7 +165,7 @@ func Insert(node *TreeNode, key string, prefix int, trie *Trie) {
 				return
 			}
 			// TODO make insert helper
-			//node.Right = insertHelper(m, node.RightEdge, key, index, prefix)
+			node.Right = insertHelper(m, node.RightEdge, key, index, prefix)
 			node.RightEdge = node.RightEdge[:index]
 			return
 		}
@@ -178,9 +188,8 @@ func Insert(node *TreeNode, key string, prefix int, trie *Trie) {
 		}
 		ExtensionNode:
 			// TODO make insert helper
-			//node.Right = insertHelper(node.Right, node.RightEdge, key, index, prefix)
+			node.Right = insertHelper(node.Right, node.RightEdge, key, index, prefix)
 			node.RightEdge = ""
 			return
 	}
-
 }
