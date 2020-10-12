@@ -54,7 +54,7 @@ func CreateTrie() *Trie {
 // Constructs the trie. Ideally will return the root or the trie itself
 func Construct(values []string, trie *Trie) {
 	for i := range values {
-		Insert(trie.Root, values[i], len(values[i]), trie)
+		insert(trie.Root, values[i], len(values[i]), trie)
 		//println(values[i])
 	}
 }
@@ -114,6 +114,7 @@ func TreeNodeFromLeaves(leaf1 *LeafNode, leaf2 *LeafNode, index int) TreeNode {
 }
 
 func insertHelper(node interface{}, edge string, key string, index int, prefix int ) interface{} {
+	// Create node with inserted node as its child
 	switch node.(type) {
 	case *LeafNode:
 		return nil
@@ -124,7 +125,7 @@ func insertHelper(node interface{}, edge string, key string, index int, prefix i
 }
 
 // Currently not hashing as I go. Either need to add that logic or hash at the end. Honestly might be best to do at end.
-func Insert(node *TreeNode, key string, prefix int, trie *Trie) {
+func insert(node *TreeNode, key string, prefix int, trie *Trie) {
 	index := findIndex(key[prefix:], node.LeftEdge)
 	if index > 0 { // if index matches on left
 		switch m := node.Left.(type) {
@@ -138,7 +139,7 @@ func Insert(node *TreeNode, key string, prefix int, trie *Trie) {
 			return
 		case *TreeNode:
 			if index == len(node.LeftEdge) {
-				Insert(m, key, prefix + index, trie)
+				insert(m, key, prefix + index, trie)
 				return
 			}
 			// TODO make insert helper
@@ -161,7 +162,7 @@ func Insert(node *TreeNode, key string, prefix int, trie *Trie) {
 			return
 		case *TreeNode:
 			if index == len(node.RightEdge) {
-				Insert(m, key, prefix + index, trie)
+				insert(m, key, prefix + index, trie)
 				return
 			}
 			// TODO make insert helper
@@ -181,7 +182,7 @@ func Insert(node *TreeNode, key string, prefix int, trie *Trie) {
 				goto ExtensionNode
 			case *TreeNode:
 				if node.RightEdge == "" {
-					Insert(m, key, prefix, trie)
+					insert(m, key, prefix, trie)
 					return
 				}
 				goto ExtensionNode
