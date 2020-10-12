@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./MerkleTree"
+	"CSE297/BlockchainProject/MerkleTree"
 	"bufio"
 	"fmt"
 	"log"
@@ -79,7 +79,7 @@ func print(root interface{}) {
 func main() {
 	chain := MerkleTree.CreateChain()
 	var first *string
-	var lastBlock *MerkleTree.Block
+	//var lastBlock *MerkleTree.Block
 	for {
 		fmt.Print("Enter the filename or 'done' to exit: ")
 		var filename string
@@ -99,28 +99,28 @@ func main() {
 		sort.Strings(lines)
 
 		// Create array of constructed lead nodes
-		leafs := make([]*MerkleTree.LeafNode, len(lines))
-		for i, line := range lines {
-			leafs[i] = MerkleTree.CreateLeafNode(line)
-		}
+		//leafs := make([]*MerkleTree.LeafNode, len(lines))
+		//for i, line := range lines {
+		//	leafs[i] = MerkleTree.CreateLeafNode(line)
+		//}
 		trie := MerkleTree.CreateTrie()
 		block := MerkleTree.CreateBlock()
 		//block.Difficulty == ??
 		//block.Nonce == ??
-		MerkleTree.Construct(leafs, trie)
-		block.Tree = trie
-		block.TreeHeadHash = trie.Root.Hash
+		MerkleTree.Construct(lines, trie)
+		//block.Tree = trie
+		//block.TreeHeadHash = trie.Root.Hash
 		block.TimeStamp = uint64(time.Now().Unix())
-		if lastBlock == nil {
-			block.PreviousHash = "0"
-		} else {
-			block.PreviousHash = lastBlock.TreeHeadHash
-		}
-		lastBlock = block
-		chain.Next = MerkleTree.CreateChain()
-		chain.Next.Previous = chain
-		chain.Block = block
-		chain = chain.Next
+		//if lastBlock == nil {
+		//	block.PreviousHash = "0"
+		//} else {
+		//	block.PreviousHash = lastBlock.TreeHeadHash
+		//}
+		//lastBlock = block
+		//chain.Next = MerkleTree.CreateChain()
+		//chain.Next.Previous = chain
+		//chain.Block = block
+		//chain = chain.Next
 	}
 	if first == nil {
 		return
