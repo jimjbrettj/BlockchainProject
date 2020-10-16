@@ -115,6 +115,7 @@ func TreeNodeFromLeaves(leaf1 *LeafNode, leaf2 *LeafNode, index int) TreeNode {
 
 func insertHelper(node interface{}, edge string, key string, index int, prefix int ) interface{} {
 	// Create node with inserted node as its child
+	// TODO implement
 	switch node.(type) {
 	case *LeafNode:
 		return nil

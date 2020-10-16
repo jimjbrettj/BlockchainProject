@@ -4,8 +4,8 @@ type Block struct {
 	PreviousHash string
 	TreeHeadHash string
 	TimeStamp    uint64
-	Difficulty   uint64
-	Nonce        uint32
+	Difficulty   byte
+	Nonce        int
 	Tree         *Trie
 }
 

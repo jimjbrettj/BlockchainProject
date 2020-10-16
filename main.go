@@ -1,10 +1,15 @@
 package main
 
 import (
-	"CSE297/BlockchainProject/MerkleTree"
+	"./MerkleTree"
+	//"CSE297/BlockchainProject/MerkleTree"
 	"bufio"
+	//"bytes"
+	"crypto/sha256"
 	"fmt"
 	"log"
+	//"math/big"
+	"math/rand"
 	"os"
 	"sort"
 	"strconv"
@@ -98,18 +103,37 @@ func main() {
 		}
 		sort.Strings(lines)
 
-		// Create array of constructed lead nodes
-		//leafs := make([]*MerkleTree.LeafNode, len(lines))
-		//for i, line := range lines {
-		//	leafs[i] = MerkleTree.CreateLeafNode(line)
-		//}
 		trie := MerkleTree.CreateTrie()
 		block := MerkleTree.CreateBlock()
-		//block.Difficulty == ??
-		//block.Nonce == ??
+
+		////// Set block difficulty //////
+		/// Commented out not necessary for now. Can do to do better but more
+		// important things to do first
+		//bigInt := big.NewInt(int64(1))
+		//bigInt = bigInt.Lsh(bigInt, 106)
+		//bigString := []byte(bigInt.String())
+		//
+		//for i := range bigString {
+		//	bigString[i] = ^bigString[i]
+		//}
+
+		block.Difficulty = byte(128)
 		MerkleTree.Construct(lines, trie)
 		block.Tree = trie
 		block.TreeHeadHash = trie.Root.Hash
+		for {
+			guess := rand.Intn(256)
+			guessString := block.TreeHeadHash + string(guess)
+			hash := sha256.Sum256([]byte(guessString))
+			guessHash := hash[0]
+			res := guessHash <= block.Difficulty
+			if res  {
+				fmt.Println("Nonce guess valid")
+				block.Nonce = guess
+				break
+			}
+			fmt.Println("Nonce guess not valid")
+		}
 		block.TimeStamp = uint64(time.Now().Unix())
 		if lastBlock == nil {
 			block.PreviousHash = "0"
@@ -162,7 +186,7 @@ func printBlock(file *os.File, block *MerkleTree.Block) {
 	file.WriteString(block.PreviousHash + "\n")
 	file.WriteString(block.TreeHeadHash + "\n")
 	file.WriteString(strconv.FormatUint(block.TimeStamp, 10) + "\n")
-	file.WriteString(strconv.FormatUint(block.Difficulty, 10) + "\n")
+	file.WriteString(string(block.Difficulty) + "\n")
 	file.WriteString(strconv.FormatUint(uint64(block.Nonce), 10) + "\n")
 	file.WriteString("END HEADER\n")
 	file.WriteString("END BLOCK\n\n")
