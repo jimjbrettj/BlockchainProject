@@ -82,7 +82,6 @@ func print(root interface{}) {
 }
 
 func main() {
-	//chain := MerkleTree.CreateChain()
 	var first *string
 	var lastBlock *MerkleTree.Block
 	for {
@@ -143,14 +142,10 @@ func main() {
 			block.Previous = lastBlock
 		}
 		lastBlock = block
-
-		//chain.Root = block
-		//chain = chain.Next
 	}
 	if first == nil {
 		return
 	}
-	//chain = chain.Previous //Rewind due to pre creating and linking to the next node above
 
 	// split the file name to adhere to output format
 	splitFile := strings.Split(*first, ".")
