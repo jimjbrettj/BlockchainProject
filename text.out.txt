@@ -1,6 +1,0 @@
-Starting to print the tree
-first
-second
-third
-fourth
-fifth

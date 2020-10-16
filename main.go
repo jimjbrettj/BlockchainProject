@@ -82,7 +82,7 @@ func print(root interface{}) {
 }
 
 func main() {
-	chain := MerkleTree.CreateChain()
+	//chain := MerkleTree.CreateChain()
 	var first *string
 	var lastBlock *MerkleTree.Block
 	for {
@@ -137,19 +137,20 @@ func main() {
 		block.TimeStamp = uint64(time.Now().Unix())
 		if lastBlock == nil {
 			block.PreviousHash = "0"
+			block.Previous = nil
 		} else {
 			block.PreviousHash = lastBlock.TreeHeadHash
+			block.Previous = lastBlock
 		}
 		lastBlock = block
-		chain.Next = MerkleTree.CreateChain()
-		chain.Next.Previous = chain
-		chain.Block = block
-		chain = chain.Next
+
+		//chain.Root = block
+		//chain = chain.Next
 	}
 	if first == nil {
 		return
 	}
-	chain = chain.Previous //Rewind due to pre creating and linking to the next node above
+	//chain = chain.Previous //Rewind due to pre creating and linking to the next node above
 
 	// split the file name to adhere to output format
 	splitFile := strings.Split(*first, ".")
@@ -162,14 +163,14 @@ func main() {
 	}
 	// Set the file to close when finished
 	for {
-		currentBlock := chain.Block
-		if currentBlock == nil {
+		currentBlock := lastBlock
+		if lastBlock == nil {
 			break
 		}
 
 		printBlock(file, currentBlock)
-		if chain.Previous != nil {
-			chain = chain.Previous
+		if lastBlock.Previous != nil {
+			lastBlock = lastBlock.Previous
 			continue
 		} else {
 			break
@@ -183,11 +184,11 @@ func main() {
 func printBlock(file *os.File, block *MerkleTree.Block) {
 	file.WriteString("BEGIN BLOCK\n")
 	file.WriteString("BEGIN HEADER\n")
-	file.WriteString(block.PreviousHash + "\n")
-	file.WriteString(block.TreeHeadHash + "\n")
-	file.WriteString(strconv.FormatUint(block.TimeStamp, 10) + "\n")
-	file.WriteString(string(block.Difficulty) + "\n")
-	file.WriteString(strconv.FormatUint(uint64(block.Nonce), 10) + "\n")
+	file.WriteString("PrevHash: " + block.PreviousHash + "\n")
+	file.WriteString("RootHash: " + block.TreeHeadHash + "\n")
+	file.WriteString("Time: " + strconv.FormatUint(block.TimeStamp, 10) + "\n")
+	file.WriteString("Target: " + string(int(block.Difficulty)) + "\n")
+	file.WriteString("Nonce: " + strconv.FormatUint(uint64(block.Nonce), 10) + "\n")
 	file.WriteString("END HEADER\n")
 	file.WriteString("END BLOCK\n\n")
 

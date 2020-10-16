@@ -1,6 +1,7 @@
 package MerkleTree
 
 type Block struct {
+	Previous     *Block
 	PreviousHash string
 	TreeHeadHash string
 	TimeStamp    uint64
