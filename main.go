@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./MerkleTree"
-	//"CSE297/BlockchainProject/MerkleTree"
+	//"./MerkleTree"
+	"CSE297/BlockchainProject/MerkleTree"
 	"bufio"
 	"encoding/hex"
 
@@ -198,11 +198,14 @@ Returns 0 for null, 1 for TreeNode, 2 for LeafNode
 */
 func getType(objectPtr interface{}) int {
 	switch objectPtr.(type) {
-	case MerkleTree.LeafNode:
+	case *MerkleTree.LeafNode:
+		//fmt.Println("Is leaf")
 		return 2
-	case MerkleTree.TreeNode:
+	case *MerkleTree.TreeNode:
+		//fmt.Println("Is Tree")
 		return 1
 	}
+	//fmt.Println("Type not found")
 	return 0
 }
 
@@ -242,7 +245,6 @@ func printLeaf(node MerkleTree.LeafNode, file *os.File) {
 }
 
 func generatePrintID(node MerkleTree.TreeNode) {
-
 	var leftHash *string = nil
 	var rightHash *string = nil
 	if getType(node.Left) == 1 {
@@ -265,19 +267,24 @@ func generatePrintID(node MerkleTree.TreeNode) {
 		rightHash = &right.Hash
 	}
 	if leftHash != nil && rightHash != nil {
+		fmt.Println("Here1")
 		node.Hash = MerkleTree.Hash(*leftHash, *rightHash)
 	} else if leftHash != nil {
+		fmt.Println("Here2")
 		node.Hash = *leftHash
 	} else if rightHash != nil {
+		fmt.Println("Here3")
 		node.Hash = *rightHash
-	} //Hopefully never doesn't meet one of these
+	}
+	//Hopefully never doesn't meet one of these
 
 }
 func writeTree(tree *MerkleTree.Trie, file *os.File) {
-	var root = *tree.Root
-	root.PrintID = 1
-	generatePrintID(root)
-	var h = height(root)
+	//var root = tree.Root
+	tree.Root.PrintID = 1
+	//fmt.Println("Root id: ", tree.Root.PrintID)
+	generatePrintID(*tree.Root)
+	var h = height(*tree.Root)
 	var i = 1
 	for i <= h {
 		printGivenLevel(*tree.Root, i, file)
@@ -291,7 +298,7 @@ func printGivenLevel(tree MerkleTree.TreeNode, level int, file *os.File) {
 	} else if level > 1 {
 		if getType(tree.Left) == 1 {
 			printGivenLevel(tree.Left.(MerkleTree.TreeNode), level-1, file)
-		} else if tree.Left != nil {
+		} else if getType(tree.Left) != 1 && tree.Left != nil {
 			printLeaf(tree.Left.(MerkleTree.LeafNode), file)
 		}
 
@@ -300,6 +307,5 @@ func printGivenLevel(tree MerkleTree.TreeNode, level int, file *os.File) {
 		} else if tree.Right != nil {
 			printLeaf(tree.Right.(MerkleTree.LeafNode), file)
 		}
-
 	}
 }
