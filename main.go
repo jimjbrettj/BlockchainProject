@@ -196,25 +196,36 @@ func printBlock(file *os.File, block *MerkleTree.Block) {
 /**
 Returns 0 for null, 1 for TreeNode, 2 for LeafNode
 */
-func getType(objectPtr interface{}) int {
-	switch objectPtr.(type) {
-	case MerkleTree.LeafNode:
-		return 2
-	case MerkleTree.TreeNode:
-		return 1
+func getType(tree MerkleTree.TreeNode, left bool) int {
+	if left {
+		switch tree.Left.(type) {
+		case MerkleTree.LeafNode:
+			return 2
+		case MerkleTree.TreeNode:
+			return 1
+		}
+		return 0
+	} else {
+		switch tree.Right.(type) {
+		case MerkleTree.LeafNode:
+			return 2
+		case MerkleTree.TreeNode:
+			return 1
+		}
+		return 0
 	}
-	return 0
+
 }
 
 func height(tree MerkleTree.TreeNode) int {
 
 	var leftHeight = 1
-	if getType(tree.Left) == 1 {
+	if getType(tree, true) == 1 {
 		leftHeight = height(tree.Left.(MerkleTree.TreeNode))
 	}
 
 	var rightHeight = 1
-	if getType(tree.Right) == 1 {
+	if getType(tree, false) == 1 {
 		rightHeight = height(tree.Right.(MerkleTree.TreeNode))
 	}
 
@@ -230,7 +241,7 @@ func printNode(node MerkleTree.TreeNode, file *os.File) {
 	file.WriteString("Node Id: " + strconv.Itoa(node.PrintID) + "\n")
 	file.WriteString("2 * Node Id: " + strconv.Itoa(2*node.PrintID) + "\n")
 	file.WriteString("Left edge " + node.LeftEdge + "\n")
-	file.WriteString("Hash: " + hex.EncodeToString([]byte(node.Hash) )+ "\n")
+	file.WriteString("Hash: " + hex.EncodeToString([]byte(node.Hash)) + "\n")
 	file.WriteString("Right edge " + node.RightEdge + "\n")
 	file.WriteString("2 * Node Id+1: " + strconv.Itoa(2*node.PrintID+1) + "\n")
 	file.WriteString("\n\n")
@@ -238,29 +249,29 @@ func printNode(node MerkleTree.TreeNode, file *os.File) {
 
 func printLeaf(node MerkleTree.LeafNode, file *os.File) {
 	file.WriteString("Leaf key " + node.Key + "\n")
-	file.WriteString("Leaf hash " + hex.EncodeToString([]byte(node.Hash) ) + "\n")
+	file.WriteString("Leaf hash " + hex.EncodeToString([]byte(node.Hash)) + "\n")
 }
 
 func generatePrintIDandHash(node MerkleTree.TreeNode) {
 
 	var leftHash *string = nil
 	var rightHash *string = nil
-	if getType(node.Left) == 1 {
+	if getType(node,true) == 1 {
 		var left = node.Left.(MerkleTree.TreeNode)
 		left.PrintID = 2 * node.PrintID
 		generatePrintIDandHash(left)
 		leftHash = &left.Hash
-	} else if getType(node.Left) == 2 {
+	} else if getType(node,true) == 2 {
 		var left = node.Left.(MerkleTree.LeafNode)
 		leftHash = &left.Hash
 	}
 
-	if getType(node.Right) == 1 {
+	if getType(node,false) == 1 {
 		var right = node.Right.(MerkleTree.TreeNode)
 		right.PrintID = 2*node.PrintID + 1
 		generatePrintIDandHash(right)
 		rightHash = &right.Hash
-	} else if getType(node.Right) == 2 {
+	} else if getType(node,false) == 2 {
 		var right = node.Right.(MerkleTree.LeafNode)
 		rightHash = &right.Hash
 	}
@@ -289,13 +300,13 @@ func printGivenLevel(tree MerkleTree.TreeNode, level int, file *os.File) {
 	if level == 1 {
 		printNode(tree, file)
 	} else if level > 1 {
-		if getType(tree.Left) == 1 {
+		if getType(tree,true) == 1 {
 			printGivenLevel(tree.Left.(MerkleTree.TreeNode), level-1, file)
 		} else if tree.Left != nil {
 			printLeaf(tree.Left.(MerkleTree.LeafNode), file)
 		}
 
-		if getType(tree.Right) == 1 {
+		if getType(tree,false) == 1 {
 			printGivenLevel(tree.Right.(MerkleTree.TreeNode), level-1, file)
 		} else if tree.Right != nil {
 			printLeaf(tree.Right.(MerkleTree.LeafNode), file)
