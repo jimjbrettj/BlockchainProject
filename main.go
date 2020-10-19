@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./MerkleTree"
-	//"CSE297/BlockchainProject/MerkleTree"
+	//"./MerkleTree"
+	"CSE297/BlockchainProject/MerkleTree"
 	"bufio"
 	"encoding/hex"
 
@@ -241,14 +241,14 @@ func printLeaf(node MerkleTree.LeafNode, file *os.File) {
 	file.WriteString("Leaf hash " + hex.EncodeToString([]byte(node.Hash) ) + "\n")
 }
 
-func generatePrintID(node MerkleTree.TreeNode) {
+func generatePrintIDandHash(node MerkleTree.TreeNode) {
 
 	var leftHash *string = nil
 	var rightHash *string = nil
 	if getType(node.Left) == 1 {
 		var left = node.Left.(MerkleTree.TreeNode)
 		left.PrintID = 2 * node.PrintID
-		generatePrintID(left)
+		generatePrintIDandHash(left)
 		leftHash = &left.Hash
 	} else if getType(node.Left) == 2 {
 		var left = node.Left.(MerkleTree.LeafNode)
@@ -258,7 +258,7 @@ func generatePrintID(node MerkleTree.TreeNode) {
 	if getType(node.Right) == 1 {
 		var right = node.Right.(MerkleTree.TreeNode)
 		right.PrintID = 2*node.PrintID + 1
-		generatePrintID(right)
+		generatePrintIDandHash(right)
 		rightHash = &right.Hash
 	} else if getType(node.Right) == 2 {
 		var right = node.Right.(MerkleTree.LeafNode)
@@ -276,7 +276,7 @@ func generatePrintID(node MerkleTree.TreeNode) {
 func writeTree(tree *MerkleTree.Trie, file *os.File) {
 	var root = *tree.Root
 	root.PrintID = 1
-	generatePrintID(root)
+	generatePrintIDandHash(root)
 	var h = height(root)
 	var i = 1
 	for i <= h {
