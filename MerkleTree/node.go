@@ -127,11 +127,11 @@ func findIndex(s1 string, s2 string) int {
 }
 
 func GetNodesHash(node interface{}) string {
-	switch node.(type) {
-	case *LeafNode:
-		return node.(*LeafNode).Key
-	case *TreeNode:
-		return node.(*TreeNode).Hash
+	switch n := node.(type) {
+	case LeafNode:
+		return n.Hash
+	case TreeNode:
+		return n.Hash
 	}
 	return ""
 }
@@ -247,24 +247,40 @@ func insert(node *TreeNode, key string, prefix int, trie *Trie) {
 
 // Check the validity of entire Blockchain
 func ValidateChain(block *Block) bool {
-	// TODO For every block, validate all members
+	return ValidateBlock(block)
+}
 
-	/*
-<<<<<<< HEAD
-	Members are:
-		Previous     *Block
-		PreviousHash string
-		TreeHeadHash string
-		TimeStamp    uint64
-		Difficulty   byte
-		Nonce        int
-		Tree         *Trie
-	 */
-	return false
+// Checks that the current block is valid
+func ValidateBlock(block *Block) bool {
+	if block == nil {
+		return true
+	}
+	validTrie := ValidateTrie(block.Tree)
+	// TODO: Validate hash of previous block
+	validHash := true
+	return validTrie && validHash && ValidateBlock(block.Previous)
 }
 
 // Checks the validity of a trie
 func ValidateTrie(trie *Trie) bool {
-	// TODO Recursive iteration of trie to validate hashes, if any dont match return false, else true
-	return false
+	return ValidateNode(trie.Root)
+}
+
+// Checks that the current node is valid
+func ValidateNode(node interface{}) bool {
+	switch n := node.(type) {
+	case *LeafNode:
+		savedHash := n.Hash
+		actualHash := Hash(n.Key, "")
+		return savedHash == actualHash;
+	case *TreeNode:
+		savedHash := n.Hash
+		actualHash := Hash(GetNodesHash(n.Left), GetNodesHash(n.Right))
+		if savedHash == actualHash {
+			return ValidateNode(n.Left) && ValidateNode(n.Right)
+		} else {
+			return false
+		}
+	}
+	return true
 }
