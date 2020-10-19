@@ -81,7 +81,6 @@ func CreateTestTrie() *Trie {
 	return &Trie
 }
 
-
 // Init empty trie
 func CreateTrie() *Trie {
 	Trie := Trie{}
@@ -91,6 +90,7 @@ func CreateTrie() *Trie {
 	node.LeftEdge = ""
 	node.Left = nil
 	node.Right = nil
+	node.PrintID = 1
 	Trie.Root = &node
 	return &Trie
 }
