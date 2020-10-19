@@ -2,6 +2,8 @@ package main
 
 import (
 	"./MerkleTree"
+	"reflect"
+
 	//"CSE297/BlockchainProject/MerkleTree"
 	"bufio"
 	//"bytes"
@@ -52,18 +54,6 @@ func writeArray(tree []string, file *os.File) bool {
 			log.Fatal(err2)
 		}
 	}
-	return false
-}
-
-func writeTree(root *MerkleTree.TreeNode, file *os.File) bool {
-	// Write to the file
-	_, err2 := file.WriteString("Hello GoLang")
-	// Make sure write was successful
-	if err2 != nil {
-		log.Fatal(err2)
-	}
-
-	// Return
 	return false
 }
 
@@ -126,7 +116,7 @@ func main() {
 			hash := sha256.Sum256([]byte(guessString))
 			guessHash := hash[0]
 			res := guessHash <= block.Difficulty
-			if res  {
+			if res {
 				fmt.Println("Nonce guess valid")
 				block.Nonce = guess
 				break
@@ -182,9 +172,100 @@ func printBlock(file *os.File, block *MerkleTree.Block) {
 	file.WriteString("PrevHash: " + block.PreviousHash + "\n")
 	file.WriteString("RootHash: " + block.TreeHeadHash + "\n")
 	file.WriteString("Time: " + strconv.FormatUint(block.TimeStamp, 10) + "\n")
-	file.WriteString("Target: " + string(int(block.Difficulty)) + "\n")
+	file.WriteString("Target: " + strconv.Itoa(int(block.Difficulty)) + "\n")
 	file.WriteString("Nonce: " + strconv.FormatUint(uint64(block.Nonce), 10) + "\n")
 	file.WriteString("END HEADER\n")
+	writeTree(block.Tree, file)
 	file.WriteString("END BLOCK\n\n")
 
+}
+
+func IsInstanceOf(objectPtr, typePtr interface{}) bool {
+	return reflect.TypeOf(objectPtr) == reflect.TypeOf(typePtr)
+}
+
+func height(tree MerkleTree.TreeNode) int {
+
+	var leftHeight = 1
+	if IsInstanceOf(&tree.Left, (*MerkleTree.TreeNode)(nil)) {
+		leftHeight = height(tree.Left.(MerkleTree.TreeNode))
+	}
+
+	var rightHeight = 1
+	if IsInstanceOf(&tree.Right, (*MerkleTree.TreeNode)(nil)) {
+		rightHeight = height(tree.Right.(MerkleTree.TreeNode))
+	}
+
+	if leftHeight > rightHeight {
+		return leftHeight + 1
+	} else {
+		return rightHeight + 1
+	}
+
+}
+
+func printNode(node MerkleTree.TreeNode, file *os.File) {
+	file.WriteString(strconv.Itoa(node.PrintID) + "\n")
+	file.WriteString(strconv.Itoa(2*node.PrintID) + "\n")
+	file.WriteString(node.LeftEdge + "\n")
+	file.WriteString(node.Hash + "\n")
+	file.WriteString(node.RightEdge + "\n")
+	file.WriteString(strconv.Itoa(2*node.PrintID+1) + "\n")
+	file.WriteString("\n\n")
+}
+
+func printLeaf(node MerkleTree.LeafNode, file *os.File) {
+	file.WriteString(node.Key + "\n")
+	file.WriteString(node.Hash + "\n")
+}
+
+func generatePrintID(node MerkleTree.TreeNode) {
+	if node.Left != nil {
+		var left1 = node.Left.(MerkleTree.TreeNode)
+		left1.PrintID = 2 * node.PrintID
+	}
+
+	if IsInstanceOf(&node.Left, (*MerkleTree.TreeNode)(nil)) {
+		var left = node.Left.(MerkleTree.TreeNode)
+		left.PrintID = 2 * node.PrintID
+		generatePrintID(left)
+	}
+
+	if IsInstanceOf(&node.Right, (*MerkleTree.TreeNode)(nil)) {
+		var right = node.Right.(MerkleTree.TreeNode)
+		right.PrintID = 2*node.PrintID + 1
+		generatePrintID(right)
+	}
+
+}
+func writeTree(tree *MerkleTree.Trie, file *os.File) {
+
+	var root = *tree.Root
+	root.PrintID = 1
+	generatePrintID(root)
+	var h = height(root)
+	var i = 1
+	for i <= h {
+		printGivenLevel(*tree.Root, i, file)
+		i++
+	}
+
+}
+func printGivenLevel(tree MerkleTree.TreeNode, level int, file *os.File) {
+	if level == 1 {
+		printNode(tree, file)
+	} else if level > 1 {
+		if IsInstanceOf(&tree.Left, (*MerkleTree.TreeNode)(nil)) {
+			printGivenLevel(tree.Left.(MerkleTree.TreeNode), level-1, file)
+		} else if tree.Left != nil {
+			printLeaf(tree.Left.(MerkleTree.LeafNode), file)
+		}
+
+		if IsInstanceOf(&tree.Right, (*MerkleTree.TreeNode)(nil)) {
+			printGivenLevel(tree.Right.(MerkleTree.TreeNode), level-1, file)
+		} else if tree.Right != nil {
+			printLeaf(tree.Right.(MerkleTree.LeafNode), file)
+		}
+
+	}
 }

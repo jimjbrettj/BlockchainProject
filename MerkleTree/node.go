@@ -14,6 +14,7 @@ type TreeNode struct {
 	Right     interface{}
 	LeftEdge  string
 	RightEdge string
+	PrintID	  int
 }
 
 type LeafNode struct {
