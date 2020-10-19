@@ -115,12 +115,16 @@ func TreeNodeFromLeaves(leaf1 *LeafNode, leaf2 *LeafNode, index int) TreeNode {
 
 func insertHelper(node interface{}, edge string, key string, index int, prefix int ) interface{} {
 	// Create node with inserted node as its child
-	// TODO implement
+	newLeafNode := LeafNode{}
+	newLeafNode.Key = key
 	switch node.(type) {
 	case *LeafNode:
-		return nil
+		return TreeNodeFromLeaves(node.(*LeafNode), &newLeafNode, index)
 	case *TreeNode:
-		return nil
+		oldNodeEdge := edge[index:]
+		newLeafEdge := key[index+prefix:]
+		hash := ""
+		return &TreeNode{hash, node, newLeafNode, oldNodeEdge, newLeafEdge}
 	}
 	return nil
 }
@@ -207,7 +211,7 @@ func ValidateChain(block *Block) bool {
 		TreeHeadHash string
 		TimeStamp    uint64
 		Difficulty   byte
-		Nonce        int  
+		Nonce        int
 		Tree         *Trie
 	 */
 	return false
