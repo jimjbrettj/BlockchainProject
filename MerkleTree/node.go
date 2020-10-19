@@ -5,7 +5,7 @@ import (
 )
 
 type Trie struct {
-	Root      *TreeNode
+	Root *TreeNode
 }
 
 type TreeNode struct {
@@ -14,11 +14,12 @@ type TreeNode struct {
 	Right     interface{}
 	LeftEdge  string
 	RightEdge string
+	PrintID   int
 }
 
 type LeafNode struct {
-	Key       string
-	Hash      string
+	Key  string
+	Hash string
 }
 
 func CreateLeafNode(key string) *LeafNode {
@@ -95,7 +96,7 @@ func Belongs(key string, branch string) bool {
 	return key[0] == branch[0]
 }
 
-func TreeNodeFromLeaves(leaf1 *LeafNode, leaf2 *LeafNode, index int) TreeNode {
+func TreeNodeFromLeaves(leaf1 LeafNode, leaf2 LeafNode, index int) TreeNode {
 	treeNode := TreeNode{}
 	if leaf1.Key[index] < leaf2.Key[index] {
 		treeNode.Left = leaf1
@@ -113,18 +114,18 @@ func TreeNodeFromLeaves(leaf1 *LeafNode, leaf2 *LeafNode, index int) TreeNode {
 	return treeNode
 }
 
-func insertHelper(node interface{}, edge string, key string, index int, prefix int ) interface{} {
+func insertHelper(node interface{}, edge string, key string, index int, prefix int) interface{} {
 	// Create node with inserted node as its child
 	newLeafNode := LeafNode{}
 	newLeafNode.Key = key
 	switch node.(type) {
 	case *LeafNode:
-		return TreeNodeFromLeaves(node.(*LeafNode), &newLeafNode, index)
+		return TreeNodeFromLeaves(node.(LeafNode), newLeafNode, index)
 	case *TreeNode:
 		oldNodeEdge := edge[index:]
 		newLeafEdge := key[index+prefix:]
 		hash := ""
-		return &TreeNode{hash, node, newLeafNode, oldNodeEdge, newLeafEdge}
+		return &TreeNode{hash, node, newLeafNode, oldNodeEdge, newLeafEdge, 0}
 	}
 	return nil
 }
@@ -144,7 +145,7 @@ func insert(node *TreeNode, key string, prefix int, trie *Trie) {
 			return
 		case *TreeNode:
 			if index == len(node.LeftEdge) {
-				insert(m, key, prefix + index, trie)
+				insert(m, key, prefix+index, trie)
 				return
 			}
 			// TODO make insert helper
@@ -167,7 +168,7 @@ func insert(node *TreeNode, key string, prefix int, trie *Trie) {
 			return
 		case *TreeNode:
 			if index == len(node.RightEdge) {
-				insert(m, key, prefix + index, trie)
+				insert(m, key, prefix+index, trie)
 				return
 			}
 			// TODO make insert helper
@@ -178,25 +179,25 @@ func insert(node *TreeNode, key string, prefix int, trie *Trie) {
 	} else {
 		// No prefix is shared on either side, insert extension code
 		switch m := node.Right.(type) {
-			case *LeafNode:
-				if m.Key == "" {
-					node.Right = CreateLeafNode(key)
-					node.RightEdge = key
-					return
-				}
-				goto ExtensionNode
-			case *TreeNode:
-				if node.RightEdge == "" {
-					insert(m, key, prefix, trie)
-					return
-				}
-				goto ExtensionNode
+		case *LeafNode:
+			if m.Key == "" {
+				node.Right = CreateLeafNode(key)
+				node.RightEdge = key
+				return
+			}
+			goto ExtensionNode
+		case *TreeNode:
+			if node.RightEdge == "" {
+				insert(m, key, prefix, trie)
+				return
+			}
+			goto ExtensionNode
 		}
-		ExtensionNode:
-			// TODO make insert helper
-			node.Right = insertHelper(node.Right, node.RightEdge, key, index, prefix)
-			node.RightEdge = ""
-			return
+	ExtensionNode:
+		// TODO make insert helper
+		node.Right = insertHelper(node.Right, node.RightEdge, key, index, prefix)
+		node.RightEdge = ""
+		return
 	}
 }
 
@@ -205,6 +206,7 @@ func ValidateChain(block *Block) bool {
 	// TODO For every block, validate all members
 
 	/*
+<<<<<<< HEAD
 	Members are:
 		Previous     *Block
 		PreviousHash string

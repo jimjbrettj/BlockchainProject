@@ -55,18 +55,6 @@ func writeArray(tree []string, file *os.File) bool {
 	return false
 }
 
-func writeTree(root *MerkleTree.TreeNode, file *os.File) bool {
-	// Write to the file
-	_, err2 := file.WriteString("Hello GoLang")
-	// Make sure write was successful
-	if err2 != nil {
-		log.Fatal(err2)
-	}
-
-	// Return
-	return false
-}
-
 func print(root interface{}) {
 	switch root.(type) {
 	case *MerkleTree.LeafNode:
@@ -126,7 +114,7 @@ func main() {
 			hash := sha256.Sum256([]byte(guessString))
 			guessHash := hash[0]
 			res := guessHash <= block.Difficulty
-			if res  {
+			if res {
 				fmt.Println("Nonce guess valid")
 				block.Nonce = guess
 				break
@@ -182,9 +170,122 @@ func printBlock(file *os.File, block *MerkleTree.Block) {
 	file.WriteString("PrevHash: " + block.PreviousHash + "\n")
 	file.WriteString("RootHash: " + block.TreeHeadHash + "\n")
 	file.WriteString("Time: " + strconv.FormatUint(block.TimeStamp, 10) + "\n")
-	file.WriteString("Target: " + string(int(block.Difficulty)) + "\n")
+	file.WriteString("Target: " + strconv.Itoa(int(block.Difficulty)) + "\n")
 	file.WriteString("Nonce: " + strconv.FormatUint(uint64(block.Nonce), 10) + "\n")
 	file.WriteString("END HEADER\n")
+	writeTree(block.Tree, file)
 	file.WriteString("END BLOCK\n\n")
 
+}
+
+/**
+Returns 0 for null, 1 for TreeNode, 2 for LeafNode
+*/
+func getType(objectPtr interface{}) int {
+	switch objectPtr.(type) {
+	case MerkleTree.LeafNode:
+		return 2
+	case MerkleTree.TreeNode:
+		return 1
+	}
+	return 0
+}
+
+func height(tree MerkleTree.TreeNode) int {
+
+	var leftHeight = 1
+	if getType(tree.Left) == 1 {
+		leftHeight = height(tree.Left.(MerkleTree.TreeNode))
+	}
+
+	var rightHeight = 1
+	if getType(tree.Right) == 1 {
+		rightHeight = height(tree.Right.(MerkleTree.TreeNode))
+	}
+
+	if leftHeight > rightHeight {
+		return leftHeight + 1
+	} else {
+		return rightHeight + 1
+	}
+
+}
+
+func printNode(node MerkleTree.TreeNode, file *os.File) {
+	file.WriteString(strconv.Itoa(node.PrintID) + "\n")
+	file.WriteString(strconv.Itoa(2*node.PrintID) + "\n")
+	file.WriteString(node.LeftEdge + "\n")
+	file.WriteString(node.Hash + "\n")
+	file.WriteString(node.RightEdge + "\n")
+	file.WriteString(strconv.Itoa(2*node.PrintID+1) + "\n")
+	file.WriteString("\n\n")
+}
+
+func printLeaf(node MerkleTree.LeafNode, file *os.File) {
+	file.WriteString(node.Key + "\n")
+	file.WriteString(node.Hash + "\n")
+}
+
+func generatePrintID(node MerkleTree.TreeNode) {
+
+	var leftHash *string = nil
+	var rightHash *string = nil
+	if getType(node.Left) == 1 {
+		var left = node.Left.(MerkleTree.TreeNode)
+		left.PrintID = 2 * node.PrintID
+		generatePrintID(left)
+		leftHash = &left.Hash
+	} else if getType(node.Left) == 2 {
+		var left = node.Left.(MerkleTree.LeafNode)
+		leftHash = &left.Hash
+	}
+
+	if getType(node.Right) == 1 {
+		var right = node.Right.(MerkleTree.TreeNode)
+		right.PrintID = 2*node.PrintID + 1
+		generatePrintID(right)
+		rightHash = &right.Hash
+	} else if getType(node.Right) == 2 {
+		var right = node.Right.(MerkleTree.LeafNode)
+		rightHash = &right.Hash
+	}
+	if leftHash != nil && rightHash != nil {
+		node.Hash = MerkleTree.Hash(*leftHash, *rightHash)
+	} else if leftHash != nil {
+		node.Hash = *leftHash
+	} else if rightHash != nil {
+		node.Hash = *rightHash
+	} //Hopefully never doesn't meet one of these
+
+}
+func writeTree(tree *MerkleTree.Trie, file *os.File) {
+
+	var root = *tree.Root
+	root.PrintID = 1
+	generatePrintID(root)
+	var h = height(root)
+	var i = 1
+	for i <= h {
+		printGivenLevel(*tree.Root, i, file)
+		i++
+	}
+
+}
+func printGivenLevel(tree MerkleTree.TreeNode, level int, file *os.File) {
+	if level == 1 {
+		printNode(tree, file)
+	} else if level > 1 {
+		if getType(tree.Left) == 1 {
+			printGivenLevel(tree.Left.(MerkleTree.TreeNode), level-1, file)
+		} else if tree.Left != nil {
+			printLeaf(tree.Left.(MerkleTree.LeafNode), file)
+		}
+
+		if getType(tree.Right) == 1 {
+			printGivenLevel(tree.Right.(MerkleTree.TreeNode), level-1, file)
+		} else if tree.Right != nil {
+			printLeaf(tree.Right.(MerkleTree.LeafNode), file)
+		}
+
+	}
 }
