@@ -71,7 +71,6 @@ func CreateTestTrie() *Trie {
 	tree2.Right = leaf4
 
 	// Root
-	// Root
 	root := TreeNode{}
 	root.Hash = Hash(tree1.Hash, tree2.Hash)
 	root.Left = tree1
