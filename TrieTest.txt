@@ -1,0 +1,32 @@
+Node Id: 0
+2 * Node Id: 0
+Left edge 
+Hash: ee9ef4558da2740320fcbc0814468dcfd3d79387706bcc089bed96587e9481fb
+Right edge 
+2 * Node Id+1: 1
+
+
+Node Id: 0
+2 * Node Id: 0
+Left edge 
+Hash: 94ffe12db3d67dc01ecec7b4688a075e2c9e5040ff3f6ad9f56a8926072de001
+Right edge 
+2 * Node Id+1: 1
+
+
+Node Id: 0
+2 * Node Id: 0
+Left edge 
+Hash: 7e63993dfa519a5f2dbe2037c9b98caceb6eee586bcad9caaf1447d3822d438f
+Right edge 
+2 * Node Id+1: 1
+
+
+Leaf key Jimbo
+Leaf hash 1d078c5ead2dd5e262fab30187c07b3894fac0151d511bf8724c801ada620ec8
+Leaf key Ollie
+Leaf hash 8ae01e3d4d5a822368929b173536815ddc02fd8488fdabe4900d9db0a8e0a417
+Leaf key Mitch
+Leaf hash 4ab41d4f63ed15ccf65cdd9ae15579d5b20c94534e213eb7b79571a15932300b
+Leaf key Kess
+Leaf hash c1bb868106d03058f1ba50e06e76247d4cbd6b0938199946aaf9051b4f1490a2

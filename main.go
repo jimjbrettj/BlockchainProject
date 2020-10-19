@@ -4,6 +4,8 @@ import (
 	"./MerkleTree"
 	//"CSE297/BlockchainProject/MerkleTree"
 	"bufio"
+	"encoding/hex"
+
 	//"bytes"
 	"crypto/sha256"
 	"fmt"
@@ -228,15 +230,15 @@ func printNode(node MerkleTree.TreeNode, file *os.File) {
 	file.WriteString("Node Id: " + strconv.Itoa(node.PrintID) + "\n")
 	file.WriteString("2 * Node Id: " + strconv.Itoa(2*node.PrintID) + "\n")
 	file.WriteString("Left edge " + node.LeftEdge + "\n")
-	file.WriteString("Hash " + node.Hash + "\n")
+	file.WriteString("Hash: " + hex.EncodeToString([]byte(node.Hash) )+ "\n")
 	file.WriteString("Right edge " + node.RightEdge + "\n")
 	file.WriteString("2 * Node Id+1: " + strconv.Itoa(2*node.PrintID+1) + "\n")
 	file.WriteString("\n\n")
 }
 
 func printLeaf(node MerkleTree.LeafNode, file *os.File) {
-	file.WriteString("Lead key " + node.Key + "\n")
-	file.WriteString("Leaf hash " + node.Hash + "\n")
+	file.WriteString("Leaf key " + node.Key + "\n")
+	file.WriteString("Leaf hash " + hex.EncodeToString([]byte(node.Hash) ) + "\n")
 }
 
 func generatePrintID(node MerkleTree.TreeNode) {
