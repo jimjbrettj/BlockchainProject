@@ -239,11 +239,11 @@ func height(tree MerkleTree.TreeNode) int {
 
 func printNode(node MerkleTree.TreeNode, file *os.File) {
 	file.WriteString("Node Id: " + strconv.Itoa(node.PrintID) + "\n")
-	file.WriteString("2 * Node Id: " + strconv.Itoa(2*node.PrintID) + "\n")
+	file.WriteString("Left ID " + strconv.Itoa(2*node.PrintID) + "\n")
 	file.WriteString("Left edge " + node.LeftEdge + "\n")
 	file.WriteString("Hash: " + hex.EncodeToString([]byte(node.Hash)) + "\n")
 	file.WriteString("Right edge " + node.RightEdge + "\n")
-	file.WriteString("2 * Node Id+1: " + strconv.Itoa(2*node.PrintID+1) + "\n")
+	file.WriteString("Right ID" + strconv.Itoa(2*node.PrintID+1) + "\n")
 	file.WriteString("\n\n")
 }
 
