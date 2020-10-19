@@ -2,8 +2,6 @@ package main
 
 import (
 	"./MerkleTree"
-	"reflect"
-
 	//"CSE297/BlockchainProject/MerkleTree"
 	"bufio"
 	//"bytes"
@@ -180,19 +178,28 @@ func printBlock(file *os.File, block *MerkleTree.Block) {
 
 }
 
-func IsInstanceOf(objectPtr, typePtr interface{}) bool {
-	return reflect.TypeOf(objectPtr) == reflect.TypeOf(typePtr)
+/**
+Returns 0 for null, 1 for TreeNode, 2 for LeafNode
+*/
+func getType(objectPtr interface{}) int {
+	switch objectPtr.(type) {
+	case MerkleTree.LeafNode:
+		return 2
+	case MerkleTree.TreeNode:
+		return 1
+	}
+	return 0
 }
 
 func height(tree MerkleTree.TreeNode) int {
 
 	var leftHeight = 1
-	if IsInstanceOf(&tree.Left, (*MerkleTree.TreeNode)(nil)) {
+	if getType(tree.Left) == 1 {
 		leftHeight = height(tree.Left.(MerkleTree.TreeNode))
 	}
 
 	var rightHeight = 1
-	if IsInstanceOf(&tree.Right, (*MerkleTree.TreeNode)(nil)) {
+	if getType(tree.Right) == 1 {
 		rightHeight = height(tree.Right.(MerkleTree.TreeNode))
 	}
 
@@ -220,22 +227,35 @@ func printLeaf(node MerkleTree.LeafNode, file *os.File) {
 }
 
 func generatePrintID(node MerkleTree.TreeNode) {
-	if node.Left != nil {
-		var left1 = node.Left.(MerkleTree.TreeNode)
-		left1.PrintID = 2 * node.PrintID
-	}
 
-	if IsInstanceOf(&node.Left, (*MerkleTree.TreeNode)(nil)) {
+	var leftHash *string = nil
+	var rightHash *string = nil
+	if getType(node.Left) == 1 {
 		var left = node.Left.(MerkleTree.TreeNode)
 		left.PrintID = 2 * node.PrintID
 		generatePrintID(left)
+		leftHash = &left.Hash
+	} else if getType(node.Left) == 2 {
+		var left = node.Left.(MerkleTree.LeafNode)
+		leftHash = &left.Hash
 	}
 
-	if IsInstanceOf(&node.Right, (*MerkleTree.TreeNode)(nil)) {
+	if getType(node.Right) == 1 {
 		var right = node.Right.(MerkleTree.TreeNode)
 		right.PrintID = 2*node.PrintID + 1
 		generatePrintID(right)
+		rightHash = &right.Hash
+	} else if getType(node.Right) == 2 {
+		var right = node.Right.(MerkleTree.LeafNode)
+		rightHash = &right.Hash
 	}
+	if leftHash != nil && rightHash != nil {
+		node.Hash = MerkleTree.Hash(*leftHash, *rightHash)
+	} else if leftHash != nil {
+		node.Hash = *leftHash
+	} else if rightHash != nil {
+		node.Hash = *rightHash
+	} //Hopefully never doesn't meet one of these
 
 }
 func writeTree(tree *MerkleTree.Trie, file *os.File) {
@@ -255,13 +275,13 @@ func printGivenLevel(tree MerkleTree.TreeNode, level int, file *os.File) {
 	if level == 1 {
 		printNode(tree, file)
 	} else if level > 1 {
-		if IsInstanceOf(&tree.Left, (*MerkleTree.TreeNode)(nil)) {
+		if getType(tree.Left) == 1 {
 			printGivenLevel(tree.Left.(MerkleTree.TreeNode), level-1, file)
 		} else if tree.Left != nil {
 			printLeaf(tree.Left.(MerkleTree.LeafNode), file)
 		}
 
-		if IsInstanceOf(&tree.Right, (*MerkleTree.TreeNode)(nil)) {
+		if getType(tree.Right) == 1 {
 			printGivenLevel(tree.Right.(MerkleTree.TreeNode), level-1, file)
 		} else if tree.Right != nil {
 			printLeaf(tree.Right.(MerkleTree.LeafNode), file)
