@@ -69,6 +69,17 @@ func print(root interface{}) {
 	}
 }
 
+func testTrie() {
+	trie := MerkleTree.CreateTestTrie()
+	file, err := os.Create("TrieTest.txt")
+	// Make sure creation completed
+	if err != nil {
+		log.Fatal(err)
+	}
+	writeTree(trie, file)
+	file.Close()
+}
+
 func main() {
 	var first *string
 	var lastBlock *MerkleTree.Block
@@ -134,6 +145,8 @@ func main() {
 	if first == nil {
 		return
 	}
+
+	testTrie()
 
 	// split the file name to adhere to output format
 	splitFile := strings.Split(*first, ".")
@@ -212,18 +225,18 @@ func height(tree MerkleTree.TreeNode) int {
 }
 
 func printNode(node MerkleTree.TreeNode, file *os.File) {
-	file.WriteString(strconv.Itoa(node.PrintID) + "\n")
-	file.WriteString(strconv.Itoa(2*node.PrintID) + "\n")
-	file.WriteString(node.LeftEdge + "\n")
-	file.WriteString(node.Hash + "\n")
-	file.WriteString(node.RightEdge + "\n")
-	file.WriteString(strconv.Itoa(2*node.PrintID+1) + "\n")
+	file.WriteString("Node Id: " + strconv.Itoa(node.PrintID) + "\n")
+	file.WriteString("2 * Node Id: " + strconv.Itoa(2*node.PrintID) + "\n")
+	file.WriteString("Left edge " + node.LeftEdge + "\n")
+	file.WriteString("Hash " + node.Hash + "\n")
+	file.WriteString("Right edge " + node.RightEdge + "\n")
+	file.WriteString("2 * Node Id+1: " + strconv.Itoa(2*node.PrintID+1) + "\n")
 	file.WriteString("\n\n")
 }
 
 func printLeaf(node MerkleTree.LeafNode, file *os.File) {
-	file.WriteString(node.Key + "\n")
-	file.WriteString(node.Hash + "\n")
+	file.WriteString("Lead key " + node.Key + "\n")
+	file.WriteString("Leaf hash " + node.Hash + "\n")
 }
 
 func generatePrintID(node MerkleTree.TreeNode) {
@@ -259,7 +272,6 @@ func generatePrintID(node MerkleTree.TreeNode) {
 
 }
 func writeTree(tree *MerkleTree.Trie, file *os.File) {
-
 	var root = *tree.Root
 	root.PrintID = 1
 	generatePrintID(root)
