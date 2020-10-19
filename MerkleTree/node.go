@@ -95,7 +95,7 @@ func Belongs(key string, branch string) bool {
 	return key[0] == branch[0]
 }
 
-func TreeNodeFromLeaves(leaf1 *LeafNode, leaf2 *LeafNode, index int) TreeNode {
+func TreeNodeFromLeaves(leaf1 LeafNode, leaf2 LeafNode, index int) TreeNode {
 	treeNode := TreeNode{}
 	if leaf1.Key[index] < leaf2.Key[index] {
 		treeNode.Left = leaf1
@@ -115,12 +115,16 @@ func TreeNodeFromLeaves(leaf1 *LeafNode, leaf2 *LeafNode, index int) TreeNode {
 
 func insertHelper(node interface{}, edge string, key string, index int, prefix int ) interface{} {
 	// Create node with inserted node as its child
-	// TODO implement
+	newLeafNode := LeafNode{}
+	newLeafNode.Key = key
 	switch node.(type) {
 	case *LeafNode:
-		return nil
+		return TreeNodeFromLeaves(node.(LeafNode), newLeafNode, index)
 	case *TreeNode:
-		return nil
+		oldNodeEdge := edge[index:]
+		newLeafEdge := key[index+prefix:]
+		hash := ""
+		return &TreeNode{hash, node, newLeafNode, oldNodeEdge, newLeafEdge}
 	}
 	return nil
 }
