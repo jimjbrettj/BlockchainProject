@@ -1,8 +1,8 @@
 package main
 
 import (
-	//"./MerkleTree"
-	"CSE297/BlockchainProject/MerkleTree"
+	"./MerkleTree"
+	//"CSE297/BlockchainProject/MerkleTree"
 	"bufio"
 	"encoding/hex"
 
@@ -252,26 +252,29 @@ func printLeaf(node MerkleTree.LeafNode, file *os.File) {
 	file.WriteString("Leaf hash " + hex.EncodeToString([]byte(node.Hash)) + "\n")
 }
 
-func generatePrintIDandHash(node MerkleTree.TreeNode) {
+func generatePrintIDandHash(nodeIn *MerkleTree.TreeNode) {
 
+	var node = *nodeIn
 	var leftHash *string = nil
 	var rightHash *string = nil
-	if getType(node,true) == 1 {
+	if getType(node, true) == 1 {
 		var left = node.Left.(MerkleTree.TreeNode)
 		left.PrintID = 2 * node.PrintID
-		generatePrintIDandHash(left)
+		generatePrintIDandHash(&left)
+		node.Left = left
 		leftHash = &left.Hash
-	} else if getType(node,true) == 2 {
+	} else if getType(node, true) == 2 {
 		var left = node.Left.(MerkleTree.LeafNode)
 		leftHash = &left.Hash
 	}
 
-	if getType(node,false) == 1 {
+	if getType(node, false) == 1 {
 		var right = node.Right.(MerkleTree.TreeNode)
 		right.PrintID = 2*node.PrintID + 1
-		generatePrintIDandHash(right)
+		generatePrintIDandHash(&right)
+		node.Right = right
 		rightHash = &right.Hash
-	} else if getType(node,false) == 2 {
+	} else if getType(node, false) == 2 {
 		var right = node.Right.(MerkleTree.LeafNode)
 		rightHash = &right.Hash
 	}
@@ -283,11 +286,16 @@ func generatePrintIDandHash(node MerkleTree.TreeNode) {
 		node.Hash = *rightHash
 	} //Hopefully never doesn't meet one of these
 
+	*nodeIn = node
 }
 func writeTree(tree *MerkleTree.Trie, file *os.File) {
 	var root = *tree.Root
 	root.PrintID = 1
-	generatePrintIDandHash(root)
+	generatePrintIDandHash(&root)
+	*tree.Root = root
+
+	//var left = root.Left.(MerkleTree.TreeNode)
+	//println(left.PrintID)
 	var h = height(root)
 	var i = 1
 	for i <= h {
@@ -300,13 +308,13 @@ func printGivenLevel(tree MerkleTree.TreeNode, level int, file *os.File) {
 	if level == 1 {
 		printNode(tree, file)
 	} else if level > 1 {
-		if getType(tree,true) == 1 {
+		if getType(tree, true) == 1 {
 			printGivenLevel(tree.Left.(MerkleTree.TreeNode), level-1, file)
 		} else if tree.Left != nil {
 			printLeaf(tree.Left.(MerkleTree.LeafNode), file)
 		}
 
-		if getType(tree,false) == 1 {
+		if getType(tree, false) == 1 {
 			printGivenLevel(tree.Right.(MerkleTree.TreeNode), level-1, file)
 		} else if tree.Right != nil {
 			printLeaf(tree.Right.(MerkleTree.LeafNode), file)

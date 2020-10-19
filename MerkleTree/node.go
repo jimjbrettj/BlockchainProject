@@ -45,19 +45,19 @@ func CreateTestTrie() *Trie {
 	// Define Leaves
 	leaf1 := LeafNode{}
 	leaf1.Key ="Jimbo"
-	//leaf1.Hash = Hash("Jimbo", "")
+	leaf1.Hash = Hash("Jimbo", "")
 
 	leaf2 := LeafNode{}
 	leaf2.Key ="Ollie"
-	//leaf2.Hash = Hash("Ollie", "")
+	leaf2.Hash = Hash("Ollie", "")
 
 	leaf3 := LeafNode{}
 	leaf3.Key ="Mitch"
-	//leaf3.Hash = Hash("Mitch", "")
+	leaf3.Hash = Hash("Mitch", "")
 
 	leaf4 := LeafNode{}
 	leaf4.Key ="Kess"
-	//leaf4.Hash = Hash("Kess", "")
+	leaf4.Hash = Hash("Kess", "")
 
 	// Define tree nodes
 	tree1 := TreeNode{}
@@ -76,7 +76,7 @@ func CreateTestTrie() *Trie {
 	//root.Hash = Hash(tree1.Hash, tree2.Hash)
 	root.Left = tree1
 	root.Right = tree2
-	root.PrintID = 1
+	//root.PrintID = 1
 	Trie.Root = &root
 
 	return &Trie
@@ -91,7 +91,7 @@ func CreateTrie() *Trie {
 	node.LeftEdge = ""
 	node.Left = nil
 	node.Right = nil
-	node.PrintID = 1
+	//node.PrintID = 1
 	Trie.Root = &node
 	return &Trie
 }
