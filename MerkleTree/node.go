@@ -247,20 +247,18 @@ func insert(node *TreeNode, key string, prefix int, trie *Trie) {
 
 // Check the validity of entire Blockchain
 func ValidateChain(block *Block) bool {
-	// TODO For every block, validate all members
+	return ValidateBlock(block)
+}
 
-	/*
-<<<<<<< HEAD
-	Members are:
-		Previous     *Block
-		PreviousHash string
-		TreeHeadHash string
-		TimeStamp    uint64
-		Difficulty   byte
-		Nonce        int
-		Tree         *Trie
-	 */
-	return false
+// Checks that the current block is valid
+func ValidateBlock(block *Block) bool {
+	if block == nil {
+		return true
+	}
+	validTrie := ValidateTrie(block.Tree)
+	// TODO: Validate hash of previous block
+	validHash := true
+	return validTrie && validHash && ValidateBlock(block.Previous)
 }
 
 // Checks the validity of a trie
@@ -268,6 +266,7 @@ func ValidateTrie(trie *Trie) bool {
 	return ValidateNode(trie.Root)
 }
 
+// Checks that the current node is valid
 func ValidateNode(node interface{}) bool {
 	switch n := node.(type) {
 	case *LeafNode:
