@@ -278,13 +278,10 @@ func generatePrintIDandHash(nodeIn *MerkleTree.TreeNode) {
 		rightHash = &right.Hash
 	}
 	if leftHash != nil && rightHash != nil {
-		fmt.Println("Here1")
 		node.Hash = MerkleTree.Hash(*leftHash, *rightHash)
 	} else if leftHash != nil {
-		fmt.Println("Here2")
 		node.Hash = *leftHash
 	} else if rightHash != nil {
-		fmt.Println("Here3")
 		node.Hash = *rightHash
 	}
 	//Hopefully never doesn't meet one of these
@@ -314,12 +311,14 @@ func printGivenLevel(tree MerkleTree.TreeNode, level int, file *os.File) {
 		if getType(tree, true) == 1 {
 			printGivenLevel(tree.Left.(MerkleTree.TreeNode), level-1, file)
 		} else if tree.Left != nil {
+			fmt.Println("Got to left leaf")
 			printLeaf(tree.Left.(MerkleTree.LeafNode), file)
 		}
 
 		if getType(tree, false) == 1 {
 			printGivenLevel(tree.Right.(MerkleTree.TreeNode), level-1, file)
 		} else if tree.Right != nil {
+			fmt.Println("Got to right leaf")
 			printLeaf(tree.Right.(MerkleTree.LeafNode), file)
 		}
 	}

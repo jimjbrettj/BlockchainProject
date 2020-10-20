@@ -1,8 +1,32 @@
 Node Id: 1
-2 * Node Id: 2
+Left ID 2
 Left edge 
-Hash: 
+Hash: 2dba5dbc339e7316aea2683faf839c1b7b1ee2313db792112588118df066aa35
 Right edge 
-2 * Node Id+1: 3
+Right ID3
 
 
+Node Id: 2
+Left ID 4
+Left edge 
+Hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+Right edge 
+Right ID5
+
+
+Node Id: 3
+Left ID 6
+Left edge 
+Hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+Right edge 
+Right ID7
+
+
+Leaf key Jimbo
+Leaf hash 
+Leaf key Ollie
+Leaf hash 
+Leaf key Mitch
+Leaf hash 
+Leaf key Kess
+Leaf hash 
