@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./MerkleTree"
-	//"CSE297/BlockchainProject/MerkleTree"
+	//"./MerkleTree"
+	"CSE297/BlockchainProject/MerkleTree"
 	"bufio"
 	"encoding/hex"
 
@@ -214,7 +214,6 @@ func getType(tree MerkleTree.TreeNode, left bool) int {
 		}
 		return 0
 	}
-
 }
 
 func height(tree MerkleTree.TreeNode) int {
@@ -252,8 +251,8 @@ func printLeaf(node MerkleTree.LeafNode, file *os.File) {
 	file.WriteString("Leaf hash " + hex.EncodeToString([]byte(node.Hash)) + "\n")
 }
 
-func generatePrintIDandHash(nodeIn *MerkleTree.TreeNode) {
 
+func generatePrintIDandHash(nodeIn *MerkleTree.TreeNode) {
 	var node = *nodeIn
 	var leftHash *string = nil
 	var rightHash *string = nil
@@ -284,7 +283,8 @@ func generatePrintIDandHash(nodeIn *MerkleTree.TreeNode) {
 		node.Hash = *leftHash
 	} else if rightHash != nil {
 		node.Hash = *rightHash
-	} //Hopefully never doesn't meet one of these
+	}
+	//Hopefully never doesn't meet one of these
 
 	*nodeIn = node
 }
@@ -311,14 +311,15 @@ func printGivenLevel(tree MerkleTree.TreeNode, level int, file *os.File) {
 		if getType(tree, true) == 1 {
 			printGivenLevel(tree.Left.(MerkleTree.TreeNode), level-1, file)
 		} else if tree.Left != nil {
+			fmt.Println("Got to left leaf")
 			printLeaf(tree.Left.(MerkleTree.LeafNode), file)
 		}
 
 		if getType(tree, false) == 1 {
 			printGivenLevel(tree.Right.(MerkleTree.TreeNode), level-1, file)
 		} else if tree.Right != nil {
+			fmt.Println("Got to right leaf")
 			printLeaf(tree.Right.(MerkleTree.LeafNode), file)
 		}
-
 	}
 }

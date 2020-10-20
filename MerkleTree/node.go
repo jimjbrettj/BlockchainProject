@@ -2,6 +2,7 @@ package MerkleTree
 
 import (
 	"crypto/sha256"
+	"fmt"
 )
 
 type Trie struct {
@@ -22,13 +23,13 @@ type LeafNode struct {
 	Hash string
 }
 
-func CreateLeafNode(key string) *LeafNode {
+func CreateLeafNode(key string) LeafNode {
 	node := LeafNode{}
 	data := []byte(key)
 	hash := sha256.Sum256(data)
 	node.Key = key
 	node.Hash = string(hash[:])
-	return &node
+	return node
 }
 
 // Concats 2 strings and takes the hash of it
@@ -45,19 +46,19 @@ func CreateTestTrie() *Trie {
 	// Define Leaves
 	leaf1 := LeafNode{}
 	leaf1.Key ="Jimbo"
-	leaf1.Hash = Hash("Jimbo", "")
+	//leaf1.Hash = Hash("Jimbo", "")
 
 	leaf2 := LeafNode{}
 	leaf2.Key ="Ollie"
-	leaf2.Hash = Hash("Ollie", "")
+	//leaf2.Hash = Hash("Ollie", "")
 
 	leaf3 := LeafNode{}
 	leaf3.Key ="Mitch"
-	leaf3.Hash = Hash("Mitch", "")
+	//leaf3.Hash = Hash("Mitch", "")
 
 	leaf4 := LeafNode{}
 	leaf4.Key ="Kess"
-	leaf4.Hash = Hash("Kess", "")
+	//leaf4.Hash = Hash("Kess", "")
 
 	// Define tree nodes
 	tree1 := TreeNode{}
@@ -70,7 +71,6 @@ func CreateTestTrie() *Trie {
 	tree2.Left = leaf3
 	tree2.Right = leaf4
 
-	// Root
 	// Root
 	root := TreeNode{}
 	//root.Hash = Hash(tree1.Hash, tree2.Hash)
@@ -96,12 +96,31 @@ func CreateTrie() *Trie {
 	return &Trie
 }
 
+func PrintLeft(node interface{}) {
+	switch n := node.(type) {
+	case *LeafNode:
+		fmt.Println(n.Key)
+		return
+	case *TreeNode:
+		fmt.Println(n.Hash)
+		if n.Left != nil {
+			fmt.Println("LEft null")
+			PrintLeft(n.Left)
+		}
+
+	}
+	return
+}
+
 // Constructs the trie. Ideally will return the root or the trie itself
 func Construct(values []string, trie *Trie) {
 	for i := range values {
-		insert(trie.Root, values[i], len(values[i]), trie)
-		//println(values[i])
+		println(values[i])
+		Insert(trie.Root, values[i], len(values[i]), trie)
+		fmt.Println("Root left: ", trie.Root.Left)
 	}
+	//fmt.Println("Root left: ", trie.Root.Left.(LeafNode).Key)
+	//fmt.Println("Root right: ", trie.Root.Right.(LeafNode).Key)
 }
 
 // Returns the min of 2 integers
@@ -170,16 +189,35 @@ func insertHelper(node interface{}, edge string, key string, index int, prefix i
 		newLeafEdge := key[index+prefix:]
 		hash := ""
 		return &TreeNode{hash, node, newLeafNode, oldNodeEdge, newLeafEdge, 0}
+	case LeafNode:
+		return TreeNodeFromLeaves(node.(LeafNode), newLeafNode, index)
+	case TreeNode:
+		oldNodeEdge := edge[index:]
+		newLeafEdge := key[index+prefix:]
+		hash := ""
+		return &TreeNode{hash, node, newLeafNode, oldNodeEdge, newLeafEdge, 0}
 	}
+
 	return nil
 }
 
 // Currently not hashing as I go. Either need to add that logic or hash at the end. Honestly might be best to do at end.
-func insert(node *TreeNode, key string, prefix int, trie *Trie) {
+func Insert(node *TreeNode, key string, prefix int, trie *Trie) {
+	if trie.Root.Left == nil {
+		fmt.Println("Left is nil insert")
+		newNode := LeafNode{}
+		newNode.Key = key
+		newNode.Hash = Hash(key, "")
+		trie.Root.Left = newNode
+		trie.Root.LeftEdge = key
+		return
+	}
 	index := findIndex(key[prefix:], node.LeftEdge)
+	fmt.Println("Index: ", index)
 	if index > 0 { // if index matches on left
 		switch m := node.Left.(type) {
 		case *LeafNode:
+			fmt.Println("*LEAF")
 			if m.Key == key {
 				return
 			}
@@ -188,15 +226,46 @@ func insert(node *TreeNode, key string, prefix int, trie *Trie) {
 			node.LeftEdge = node.LeftEdge[:index]
 			return
 		case *TreeNode:
+			fmt.Println("*TREE")
 			if index == len(node.LeftEdge) {
-				insert(m, key, prefix+index, trie)
+				Insert(m, key, prefix+index, trie)
 				return
 			}
 			// TODO make insert helper
 			node.Left = insertHelper(m, node.LeftEdge, key, index, prefix)
 			node.LeftEdge = node.LeftEdge[:index]
 			return
+		case LeafNode:
+			fmt.Println("LEAF")
+			if m.Key == key {
+				return
+			}
+			// TODO make insert helper
+			node.Left = insertHelper(m, node.LeftEdge, key, index, prefix)
+			node.LeftEdge = node.LeftEdge[:index]
+			return
+		case TreeNode:
+			fmt.Println("TREE")
+			if index == len(node.LeftEdge) {
+				Insert(&m, key, prefix+index, trie)
+				return
+			}
+			// TODO make insert helper
+			node.Left = insertHelper(m, node.LeftEdge, key, index, prefix)
+			node.LeftEdge = node.LeftEdge[:index]
+			return
+
 		}
+	}
+
+	if trie.Root.Right == nil {
+		fmt.Println("Right is nil insert", key)
+		newNode := LeafNode{}
+		newNode.Key = key
+		newNode.Hash = Hash(key, "")
+		trie.Root.Right = newNode
+		trie.Root.RightEdge = key
+		return
 	}
 
 	index = findIndex(key[prefix:], node.RightEdge)
@@ -212,7 +281,24 @@ func insert(node *TreeNode, key string, prefix int, trie *Trie) {
 			return
 		case *TreeNode:
 			if index == len(node.RightEdge) {
-				insert(m, key, prefix+index, trie)
+				Insert(m, key, prefix+index, trie)
+				return
+			}
+			// TODO make insert helper
+			node.Right = insertHelper(m, node.RightEdge, key, index, prefix)
+			node.RightEdge = node.RightEdge[:index]
+			return
+		case LeafNode:
+			if m.Key == key {
+				return
+			}
+			// TODO make insert helper
+			node.Right = insertHelper(m, node.RightEdge, key, index, prefix)
+			node.RightEdge = node.RightEdge[:index]
+			return
+		case TreeNode:
+			if index == len(node.RightEdge) {
+				Insert(&m, key, prefix+index, trie)
 				return
 			}
 			// TODO make insert helper
@@ -232,7 +318,20 @@ func insert(node *TreeNode, key string, prefix int, trie *Trie) {
 			goto ExtensionNode
 		case *TreeNode:
 			if node.RightEdge == "" {
-				insert(m, key, prefix, trie)
+				Insert(m, key, prefix, trie)
+				return
+			}
+			goto ExtensionNode
+		case LeafNode:
+			if m.Key == "" {
+				node.Right = CreateLeafNode(key)
+				node.RightEdge = key
+				return
+			}
+			goto ExtensionNode
+		case TreeNode:
+			if node.RightEdge == "" {
+				Insert(&m, key, prefix, trie)
 				return
 			}
 			goto ExtensionNode
