@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./MerkleTree"
-	//"CSE297/BlockchainProject/MerkleTree"
+	//"./MerkleTree"
+	"CSE297/BlockchainProject/MerkleTree"
 	"bufio"
 	"encoding/hex"
 
