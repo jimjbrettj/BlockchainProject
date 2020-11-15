@@ -23,13 +23,13 @@ type LeafNode struct {
 	Hash string
 }
 
-func CreateLeafNode(key string) LeafNode {
+func CreateLeafNode(key string) *LeafNode {
 	node := LeafNode{}
 	data := []byte(key)
 	hash := sha256.Sum256(data)
 	node.Key = key
 	node.Hash = string(hash[:])
-	return node
+	return &node
 }
 
 // Concats 2 strings and takes the hash of it
@@ -85,14 +85,6 @@ func CreateTestTrie() *Trie {
 // Init empty trie
 func CreateTrie() *Trie {
 	Trie := Trie{}
-	node := TreeNode{}
-	node.Hash = ""
-	node.RightEdge = ""
-	node.LeftEdge = ""
-	node.Left = nil
-	node.Right = nil
-	//node.PrintID = 1
-	Trie.Root = &node
 	return &Trie
 }
 
@@ -113,11 +105,10 @@ func PrintLeft(node interface{}) {
 }
 
 // Constructs the trie. Ideally will return the root or the trie itself
-func Construct(values []string, trie *Trie) {
+func (trie *Trie) Construct(values []string) {
 	for i := range values {
 		println(values[i])
-		Insert(trie.Root, values[i], len(values[i]), trie)
-		fmt.Println("Root left: ", trie.Root.Left)
+		trie.Insert(values[i])
 	}
 	//fmt.Println("Root left: ", trie.Root.Left.(LeafNode).Key)
 	//fmt.Println("Root right: ", trie.Root.Right.(LeafNode).Key)
@@ -147,10 +138,12 @@ func findIndex(s1 string, s2 string) int {
 
 func GetNodesHash(node interface{}) string {
 	switch n := node.(type) {
-	case LeafNode:
+	case *LeafNode:
 		return n.Hash
-	case TreeNode:
+	case *TreeNode:
 		return n.Hash
+	default:
+		println("DEFAULT CASE getNodeHash")
 	}
 	return ""
 }
@@ -159,7 +152,7 @@ func Belongs(key string, branch string) bool {
 	return key[0] == branch[0]
 }
 
-func TreeNodeFromLeaves(leaf1 LeafNode, leaf2 LeafNode, index int) TreeNode {
+func TreeNodeFromLeaves(leaf1 *LeafNode, leaf2 *LeafNode, index int) *TreeNode {
 	treeNode := TreeNode{}
 	if leaf1.Key[index] < leaf2.Key[index] {
 		treeNode.Left = leaf1
@@ -174,172 +167,113 @@ func TreeNodeFromLeaves(leaf1 LeafNode, leaf2 LeafNode, index int) TreeNode {
 		treeNode.LeftEdge = leaf2.Key[index:]
 		treeNode.Hash = Hash(leaf2.Key, leaf1.Key)
 	}
-	return treeNode
+	return &treeNode
 }
 
-func insertHelper(node interface{}, edge string, key string, index int, prefix int) interface{} {
+func insertHelper(node interface{}, edge string, key string, index int, prefix int) *TreeNode {
 	// Create node with inserted node as its child
 	newLeafNode := LeafNode{}
 	newLeafNode.Key = key
 	switch node.(type) {
 	case *LeafNode:
-		return TreeNodeFromLeaves(node.(LeafNode), newLeafNode, index)
+		return TreeNodeFromLeaves(node.(*LeafNode), &newLeafNode, index)
 	case *TreeNode:
 		oldNodeEdge := edge[index:]
 		newLeafEdge := key[index+prefix:]
 		hash := ""
 		return &TreeNode{hash, node, newLeafNode, oldNodeEdge, newLeafEdge, 0}
-	case LeafNode:
-		return TreeNodeFromLeaves(node.(LeafNode), newLeafNode, index)
-	case TreeNode:
-		oldNodeEdge := edge[index:]
-		newLeafEdge := key[index+prefix:]
-		hash := ""
-		return &TreeNode{hash, node, newLeafNode, oldNodeEdge, newLeafEdge, 0}
+	default:
+		println("DEFAULT CASE insertHelper")
 	}
-
 	return nil
 }
 
-// Currently not hashing as I go. Either need to add that logic or hash at the end. Honestly might be best to do at end.
-func Insert(node *TreeNode, key string, prefix int, trie *Trie) {
-	if trie.Root.Left == nil {
-		fmt.Println("Left is nil insert")
-		newNode := LeafNode{}
-		newNode.Key = key
-		newNode.Hash = Hash(key, "")
-		trie.Root.Left = newNode
-		trie.Root.LeftEdge = key
-		return
+func (trie *Trie) Insert(key string) {
+	if trie.Root == nil {
+		leaf := CreateLeafNode(key)
+		dumb := CreateLeafNode("")
+		trie.Root = &TreeNode{
+			"",
+			leaf,
+			dumb,
+			key,
+			"",
+			0,
+		}
+	} else {
+		insert(trie.Root, key, 0)
 	}
-	index := findIndex(key[prefix:], node.LeftEdge)
-	fmt.Println("Index: ", index)
+}
+
+// Currently not hashing as I go. Either need to add that logic or hash at the end. Honestly might be best to do at end.
+func insert(root *TreeNode, key string, prefix int) {
+	index := findIndex(key[prefix:], root.LeftEdge)
 	if index > 0 { // if index matches on left
-		switch m := node.Left.(type) {
+		switch m := root.Left.(type) {
 		case *LeafNode:
-			fmt.Println("*LEAF")
 			if m.Key == key {
 				return
 			}
-			// TODO make insert helper
-			node.Left = insertHelper(m, node.LeftEdge, key, index, prefix)
-			node.LeftEdge = node.LeftEdge[:index]
+			root.Left = insertHelper(m, root.LeftEdge, key, index, prefix)
+			root.LeftEdge = root.LeftEdge[:index]
 			return
 		case *TreeNode:
-			fmt.Println("*TREE")
-			if index == len(node.LeftEdge) {
-				Insert(m, key, prefix+index, trie)
+			if index == len(root.LeftEdge) {
+				insert(m, key, prefix+index)
 				return
 			}
-			// TODO make insert helper
-			node.Left = insertHelper(m, node.LeftEdge, key, index, prefix)
-			node.LeftEdge = node.LeftEdge[:index]
+			root.Left = insertHelper(m, root.LeftEdge, key, index, prefix)
+			root.LeftEdge = root.LeftEdge[:index]
 			return
-		case LeafNode:
-			fmt.Println("LEAF")
-			if m.Key == key {
-				return
-			}
-			// TODO make insert helper
-			node.Left = insertHelper(m, node.LeftEdge, key, index, prefix)
-			node.LeftEdge = node.LeftEdge[:index]
-			return
-		case TreeNode:
-			fmt.Println("TREE")
-			if index == len(node.LeftEdge) {
-				Insert(&m, key, prefix+index, trie)
-				return
-			}
-			// TODO make insert helper
-			node.Left = insertHelper(m, node.LeftEdge, key, index, prefix)
-			node.LeftEdge = node.LeftEdge[:index]
-			return
+		default:
+			println("DEFAULT CASE")
 
 		}
 	}
 
-	if trie.Root.Right == nil {
-		fmt.Println("Right is nil insert", key)
-		newNode := LeafNode{}
-		newNode.Key = key
-		newNode.Hash = Hash(key, "")
-		trie.Root.Right = newNode
-		trie.Root.RightEdge = key
-		return
-	}
-
-	index = findIndex(key[prefix:], node.RightEdge)
+	index = findIndex(key[prefix:], root.RightEdge)
 	if index > 0 { // if index matches on right
-		switch m := node.Right.(type) {
+		switch m := root.Right.(type) {
 		case *LeafNode:
 			if m.Key == key {
 				return
 			}
-			// TODO make insert helper
-			node.Right = insertHelper(m, node.RightEdge, key, index, prefix)
-			node.RightEdge = node.RightEdge[:index]
+			root.Right = insertHelper(m, root.RightEdge, key, index, prefix)
+			root.RightEdge = root.RightEdge[:index]
 			return
 		case *TreeNode:
-			if index == len(node.RightEdge) {
-				Insert(m, key, prefix+index, trie)
+			if index == len(root.RightEdge) {
+				insert(m, key, prefix+index)
 				return
 			}
-			// TODO make insert helper
-			node.Right = insertHelper(m, node.RightEdge, key, index, prefix)
-			node.RightEdge = node.RightEdge[:index]
+			root.Right = insertHelper(m, root.RightEdge, key, index, prefix)
+			root.RightEdge = root.RightEdge[:index]
 			return
-		case LeafNode:
-			if m.Key == key {
-				return
-			}
-			// TODO make insert helper
-			node.Right = insertHelper(m, node.RightEdge, key, index, prefix)
-			node.RightEdge = node.RightEdge[:index]
-			return
-		case TreeNode:
-			if index == len(node.RightEdge) {
-				Insert(&m, key, prefix+index, trie)
-				return
-			}
-			// TODO make insert helper
-			node.Right = insertHelper(m, node.RightEdge, key, index, prefix)
-			node.RightEdge = node.RightEdge[:index]
-			return
+		default:
+			println("DEFAULT CASE")
 		}
 	} else {
 		// No prefix is shared on either side, insert extension code
-		switch m := node.Right.(type) {
+		switch m := root.Right.(type) {
 		case *LeafNode:
 			if m.Key == "" {
-				node.Right = CreateLeafNode(key)
-				node.RightEdge = key
+				root.Right = CreateLeafNode(key)
+				root.RightEdge = key
 				return
 			}
 			goto ExtensionNode
 		case *TreeNode:
-			if node.RightEdge == "" {
-				Insert(m, key, prefix, trie)
+			if root.RightEdge == "" {
+				insert(m, key, prefix)
 				return
 			}
 			goto ExtensionNode
-		case LeafNode:
-			if m.Key == "" {
-				node.Right = CreateLeafNode(key)
-				node.RightEdge = key
-				return
-			}
-			goto ExtensionNode
-		case TreeNode:
-			if node.RightEdge == "" {
-				Insert(&m, key, prefix, trie)
-				return
-			}
-			goto ExtensionNode
+		default:
+			println("DEFAULT CASE")
 		}
 	ExtensionNode:
-		// TODO make insert helper
-		node.Right = insertHelper(node.Right, node.RightEdge, key, index, prefix)
-		node.RightEdge = ""
+		root.Right = insertHelper(root.Right, root.RightEdge, key, index, prefix)
+		root.RightEdge = ""
 		return
 	}
 }
