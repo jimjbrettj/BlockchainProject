@@ -40,48 +40,6 @@ func Hash(l string, r string) string {
 	return string(hash[:])
 }
 
-func CreateTestTrie() *Trie {
-	Trie := Trie{}
-
-	// Define Leaves
-	leaf1 := LeafNode{}
-	leaf1.Key ="Jimbo"
-	//leaf1.Hash = Hash("Jimbo", "")
-
-	leaf2 := LeafNode{}
-	leaf2.Key ="Ollie"
-	//leaf2.Hash = Hash("Ollie", "")
-
-	leaf3 := LeafNode{}
-	leaf3.Key ="Mitch"
-	//leaf3.Hash = Hash("Mitch", "")
-
-	leaf4 := LeafNode{}
-	leaf4.Key ="Kess"
-	//leaf4.Hash = Hash("Kess", "")
-
-	// Define tree nodes
-	tree1 := TreeNode{}
-	//tree1.Hash = Hash(leaf1.Hash, leaf2.Hash)
-	tree1.Left = leaf1
-	tree1.Right = leaf2
-
-	tree2 := TreeNode{}
-	//tree2.Hash = Hash(leaf3.Hash, leaf4.Hash)
-	tree2.Left = leaf3
-	tree2.Right = leaf4
-
-	// Root
-	root := TreeNode{}
-	//root.Hash = Hash(tree1.Hash, tree2.Hash)
-	root.Left = tree1
-	root.Right = tree2
-	//root.PrintID = 1
-	Trie.Root = &root
-
-	return &Trie
-}
-
 // Init empty trie
 func CreateTrie() *Trie {
 	Trie := Trie{}
@@ -96,10 +54,9 @@ func PrintLeft(node interface{}) {
 	case *TreeNode:
 		fmt.Println(n.Hash)
 		if n.Left != nil {
-			fmt.Println("LEft null")
+			fmt.Println("Left null")
 			PrintLeft(n.Left)
 		}
-
 	}
 	return
 }
@@ -110,8 +67,6 @@ func (trie *Trie) Construct(values []string) {
 		println(values[i])
 		trie.Insert(values[i])
 	}
-	//fmt.Println("Root left: ", trie.Root.Left.(LeafNode).Key)
-	//fmt.Println("Root right: ", trie.Root.Right.(LeafNode).Key)
 }
 
 // Returns the min of 2 integers
@@ -152,23 +107,23 @@ func Belongs(key string, branch string) bool {
 	return key[0] == branch[0]
 }
 
-func TreeNodeFromLeaves(leaf1 *LeafNode, leaf2 *LeafNode, index int) *TreeNode {
-	treeNode := TreeNode{}
-	if leaf1.Key[index] < leaf2.Key[index] {
-		treeNode.Left = leaf1
-		treeNode.Right = leaf2
-		treeNode.LeftEdge = leaf1.Key[index:]
-		treeNode.RightEdge = leaf2.Key[index:]
-		treeNode.Hash = Hash(leaf1.Key, leaf2.Key)
-	} else {
-		treeNode.Right = leaf1
-		treeNode.Left = leaf2
-		treeNode.RightEdge = leaf1.Key[index:]
-		treeNode.LeftEdge = leaf2.Key[index:]
-		treeNode.Hash = Hash(leaf2.Key, leaf1.Key)
-	}
-	return &treeNode
-}
+//func TreeNodeFromLeaves(leaf1 *LeafNode, leaf2 *LeafNode, index int) *TreeNode {
+//	treeNode := TreeNode{}
+//	if leaf1.Key[index] < leaf2.Key[index] {
+//		treeNode.Left = leaf1
+//		treeNode.Right = leaf2
+//		treeNode.LeftEdge = leaf1.Key[index:]
+//		treeNode.RightEdge = leaf2.Key[index:]
+//		treeNode.Hash = Hash(leaf1.Key, leaf2.Key)
+//	} else {
+//		treeNode.Right = leaf1
+//		treeNode.Left = leaf2
+//		treeNode.RightEdge = leaf1.Key[index:]
+//		treeNode.LeftEdge = leaf2.Key[index:]
+//		treeNode.Hash = Hash(leaf2.Key, leaf1.Key)
+//	}
+//	return &treeNode
+//}
 
 func insertHelper(node interface{}, edge string, key string, index int, prefix int) *TreeNode {
 	// Create node with inserted node as its child
@@ -231,7 +186,6 @@ func insert(root *TreeNode, key string, prefix int) {
 			return
 		default:
 			println("DEFAULT CASE")
-
 		}
 	}
 
@@ -293,7 +247,6 @@ func ValidateBlock(block *Block) bool {
 		return true
 	}
 	validTrie := ValidateTrie(block.Tree)
-	// TODO: Validate hash of previous block
 	validHash := true
 	return validTrie && validHash && ValidateBlock(block.Previous)
 }

@@ -39,49 +39,6 @@ func readFile(filename string) ([]string, error) {
 	return lines, scanner.Err()
 }
 
-func writeArray(tree []string, file *os.File) bool {
-	// Write to the file
-	_, err := file.WriteString("Starting to print the tree\n")
-	// Make sure write was successful
-	if err != nil {
-		log.Fatal(err)
-	}
-	// Begin printing out the contents of the array
-	for i := 0; i < len(tree); i++ {
-		_, err2 := file.WriteString(tree[i] + "\n")
-		// Make sure write was successful
-		if err2 != nil {
-			log.Fatal(err2)
-		}
-	}
-	return false
-}
-
-func print(root interface{}) {
-	switch root.(type) {
-	case *MerkleTree.LeafNode:
-		fmt.Println("Leaf: ", root.(*MerkleTree.LeafNode).Key)
-	case *MerkleTree.TreeNode:
-		fmt.Println("TreeHash: ", root.(*MerkleTree.TreeNode).Hash)
-		fmt.Println("TreeLeft: ", root.(*MerkleTree.TreeNode).LeftEdge)
-		fmt.Println("TreeRight: ", root.(*MerkleTree.TreeNode).RightEdge)
-		fmt.Println()
-		print(root.(*MerkleTree.TreeNode).Left)
-		print(root.(*MerkleTree.TreeNode).Right)
-	}
-}
-
-func testTrie() {
-	trie := MerkleTree.CreateTestTrie()
-	file, err := os.Create("TrieTest.txt")
-	// Make sure creation completed
-	if err != nil {
-		log.Fatal(err)
-	}
-	writeTree(trie, file)
-	file.Close()
-}
-
 func main() {
 	var first *string
 	var lastBlock *MerkleTree.Block
@@ -105,17 +62,6 @@ func main() {
 
 		trie := MerkleTree.CreateTrie()
 		block := MerkleTree.CreateBlock()
-
-		////// Set block difficulty //////
-		/// Commented out not necessary for now. Can do to do better but more
-		// important things to do first
-		//bigInt := big.NewInt(int64(1))
-		//bigInt = bigInt.Lsh(bigInt, 106)
-		//bigString := []byte(bigInt.String())
-		//
-		//for i := range bigString {
-		//	bigString[i] = ^bigString[i]
-		//}
 
 		block.Difficulty = byte(128)
 		trie.Construct(lines)
@@ -148,8 +94,6 @@ func main() {
 	if first == nil {
 		return
 	}
-
-	//testTrie()
 
 	// split the file name to adhere to output format
 	splitFile := strings.Split(*first, ".")
@@ -292,12 +236,13 @@ func generatePrintIDandHash(node *MerkleTree.TreeNode) {
 }
 func writeTree(tree *MerkleTree.Trie, file *os.File) {
 	tree.Root.PrintID = 1
-	generatePrintIDandHash(tree.Root)
+	//generatePrintIDandHash(tree.Root)
 
 
 	//var left = root.Left.(MerkleTree.TreeNode)
 	//println(left.PrintID)
 	var h = height(tree.Root)
+	println("Height:", h)
 	var i = 1
 	for i <= h {
 		printGivenLevel(tree.Root, i, file)
@@ -312,14 +257,12 @@ func printGivenLevel(tree *MerkleTree.TreeNode, level int, file *os.File) {
 		if getType(tree, true) == 1 {
 			printGivenLevel(tree.Left.(*MerkleTree.TreeNode), level-1, file)
 		} else if tree.Left != nil {
-			fmt.Println("Got to left leaf")
 			printLeaf(tree.Left.(*MerkleTree.LeafNode), file)
 		}
 
 		if getType(tree, false) == 1 {
 			printGivenLevel(tree.Right.(*MerkleTree.TreeNode), level-1, file)
 		} else if tree.Right != nil {
-			fmt.Println("Got to right leaf")
 			printLeaf(tree.Right.(*MerkleTree.LeafNode), file)
 		}
 	}
