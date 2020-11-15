@@ -172,20 +172,24 @@ func TreeNodeFromLeaves(leaf1 *LeafNode, leaf2 *LeafNode, index int) *TreeNode {
 
 func insertHelper(node interface{}, edge string, key string, index int, prefix int) *TreeNode {
 	// Create node with inserted node as its child
-	newLeafNode := LeafNode{}
-	newLeafNode.Key = key
-	switch node.(type) {
-	case *LeafNode:
-		return TreeNodeFromLeaves(node.(*LeafNode), &newLeafNode, index)
-	case *TreeNode:
-		oldNodeEdge := edge[index:]
-		newLeafEdge := key[index+prefix:]
-		hash := ""
-		return &TreeNode{hash, node, newLeafNode, oldNodeEdge, newLeafEdge, 0}
-	default:
-		println("DEFAULT CASE insertHelper")
-	}
-	return nil
+	//newLeafNode := LeafNode{}
+	//newLeafNode.Key = key
+	//switch node.(type) {
+	//case *LeafNode:
+	//	return TreeNodeFromLeaves(node.(*LeafNode), &newLeafNode, index)
+	//case *TreeNode:
+	//	oldNodeEdge := edge[index:]
+	//	newLeafEdge := key[index+prefix:]
+	//	hash := ""
+	//	return &TreeNode{hash, node, newLeafNode, oldNodeEdge, newLeafEdge, 0}
+	//default:
+	//	println("DEFAULT CASE insertHelper")
+	//}
+	oldNodeEdge := edge[index:]
+	newLeafEdge := key[prefix+index:]
+	newLeafNode := CreateLeafNode(key)
+	return &TreeNode{"", node, newLeafNode, oldNodeEdge, newLeafEdge, 0}
+	//return nil
 }
 
 func (trie *Trie) Insert(key string) {

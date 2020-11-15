@@ -1,7 +1,7 @@
 Node Id: 1
 Left ID 2
 Left edge 
-Hash: 2dba5dbc339e7316aea2683faf839c1b7b1ee2313db792112588118df066aa35
+Hash: 
 Right edge 
 Right ID3
 

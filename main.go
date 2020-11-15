@@ -120,6 +120,7 @@ func main() {
 		block.Difficulty = byte(128)
 		trie.Construct(lines)
 		block.Tree = trie
+		generatePrintIDandHash(trie.Root)
 		block.TreeHeadHash = trie.Root.Hash
 		for {
 			guess := rand.Intn(256)
@@ -203,6 +204,8 @@ func getType(tree *MerkleTree.TreeNode, left bool) int {
 			return 2
 		case *MerkleTree.TreeNode:
 			return 1
+		default:
+			println("DEFAULT getType")
 		}
 		return 0
 	} else {
@@ -211,6 +214,8 @@ func getType(tree *MerkleTree.TreeNode, left bool) int {
 			return 2
 		case *MerkleTree.TreeNode:
 			return 1
+		default:
+			println("DEFAULT getType")
 		}
 		return 0
 	}
@@ -253,17 +258,17 @@ func printLeaf(node *MerkleTree.LeafNode, file *os.File) {
 
 
 func generatePrintIDandHash(node *MerkleTree.TreeNode) {
-	var leftHash *string = nil
-	var rightHash *string = nil
+	var leftHash  = ""
+	var rightHash = ""
 	if getType(node, true) == 1 {
 		var left = node.Left.(*MerkleTree.TreeNode)
 		left.PrintID = 2 * node.PrintID
 		generatePrintIDandHash(left)
 		node.Left = left
-		leftHash = &left.Hash
+		leftHash = left.Hash
 	} else if getType(node, true) == 2 {
 		var left = node.Left.(*MerkleTree.LeafNode)
-		leftHash = &left.Hash
+		leftHash = left.Hash
 	}
 
 	if getType(node, false) == 1 {
@@ -271,29 +276,28 @@ func generatePrintIDandHash(node *MerkleTree.TreeNode) {
 		right.PrintID = 2*node.PrintID + 1
 		generatePrintIDandHash(right)
 		node.Right = right
-		rightHash = &right.Hash
+		rightHash = right.Hash
 	} else if getType(node, false) == 2 {
 		var right = node.Right.(*MerkleTree.LeafNode)
-		rightHash = &right.Hash
+		rightHash = right.Hash
 	}
-	if leftHash != nil && rightHash != nil {
-		node.Hash = MerkleTree.Hash(*leftHash, *rightHash)
-	} else if leftHash != nil {
-		node.Hash = *leftHash
-	} else if rightHash != nil {
-		node.Hash = *rightHash
+	if leftHash != "" && rightHash != "" {
+		node.Hash = MerkleTree.Hash(leftHash, rightHash)
+	} else if leftHash != "" {
+		node.Hash = leftHash
+	} else if rightHash != "" {
+		node.Hash = rightHash
 	}
 	//Hopefully never doesn't meet one of these
 }
 func writeTree(tree *MerkleTree.Trie, file *os.File) {
-	var root = tree.Root
-	root.PrintID = 1
-	generatePrintIDandHash(root)
+	tree.Root.PrintID = 1
+	generatePrintIDandHash(tree.Root)
 
 
 	//var left = root.Left.(MerkleTree.TreeNode)
 	//println(left.PrintID)
-	var h = height(root)
+	var h = height(tree.Root)
 	var i = 1
 	for i <= h {
 		printGivenLevel(tree.Root, i, file)
